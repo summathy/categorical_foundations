@@ -1,0 +1,1666 @@
+\documentclass{article}
+
+\usepackage{packages/layout}
+\usepackage{packages/notation}
+\usepackage{packages/diagrams_old}
+\usepackage{packages/circledsteps}
+
+\usetikzlibrary{positioning}
+\usepackage{upgreek}
+
+\usepackage{pdfpages}
+
+% \DeclareMathOperator{\PsMon}{PsMon}
+% \DeclareMathOperator{\BPsMon}{BPsMon}
+% \DeclareMathOperator{\SPsMon}{SPsMon}
+% \DeclareMathOperator{\first}{first}
+% \DeclareMathOperator{\interm}{interm}
+% \DeclareMathOperator{\second}{second}
+% \DeclareMathOperator{\comp}{comp}
+% \DeclareMathOperator{\fact}{fact}
+% \DeclareMathOperator{\init}{init}
+% \DeclareMathOperator{\fold}{fold}
+% \DeclareMathOperator{\cofold}{cofold}
+% %\DeclareMathOperator{\span}{span}
+% \DeclareMathOperator{\cospan}{cospan}
+
+\DeclareMathOperator{\Img}{Img}
+\DeclareMathOperator{\true}{true}
+\DeclareMathOperator{\false}{false}
+\renewcommand{\succ}{\operatorname{succ}}
+\NewDocumentCommand{\fin}{}{\text{fin}}
+\NewDocumentCommand{\abs}{m}{\vert#1\vert}
+\NewDocumentCommand{\rightincl}{}{\hookrightarrow}
+
+% \NewDocumentCommand{\pb}{mm}{\ensuremath{{}_{#1}\!\times_{#2}}}
+\NewDocumentCommand{\pb}{mm}{\ensuremath{\underset{#1=#2}{\times}}}
+
+\title{Categorical Set Theory\\An Introduction to the Foundations of Mathematics}
+\author{Jonas Linssen}
+
+\begin{document}
+
+	\maketitle
+	\tableofcontents
+
+	\newpage
+	\section*{Introduction}
+	\TODO{what is the purpose, on meta-}
+
+	\TODO{note to the experts in set-, topos- and category theory}
+
+	\newpage
+	\section{The Category of Sets}
+	\subsection{The Axiom of Sets and Functions}
+
+	Our long list of axioms starts with a context in which we can express all the other axioms. We would like to introduce two distinct primitive notions, that of \textit{sets} and that of \textit{functions} between sets. We are \underline{not} concerned with the ontology of these notions, i.e. we do not care what they actually are. Instead we rely on our intuition to guide us to a list of axioms. Everything which satisfies this list of axioms can be considered a theory of sets.
+
+	So what \textit{is} our intuition for sets and functions? \TODO{Cantor, Function}  
+
+	\begin{axiom}[Category $\ncat{Set}$]
+		There are two distinct primitive notions of \textbf{Sets} (which we denote by capital letters) and \textbf{Functions} (which we denote by lowercase letters). Every function comes with a specified set called its \textbf{domain} and a specified set called its \textbf{codomain}. We denote a function $f$ with domain $X$ and codomain $Y$ by $f:X\rightarrow Y$ or $\smash{X\xrightarrow{f}Y}$.
+
+		Functions $f$ and $g$ such that the codomain of $f$ equals the domain of $g$ are called \textbf{composable}. For any composable pair of functions $f:X\rightarrow Y$ and $g:Y\rightarrow Z$ we suppose to have a unique \textbf{composite function} $g\circ f:X\rightarrow Z$ with the domain of $f$ to the codomain of $g$.
+
+		Given functions $f:X\rightarrow Y$, $g:Y\rightarrow Z$ and $h:Z\rightarrow W$ we suppose that composition is \textbf{associative} in the sense that the two composite morphism $h \circ (g \circ f): X \rightarrow W$ and $(h\circ g) \circ f: X\rightarrow W$ are equal.
+
+		Furthermore we declare that every set $X$ has a dedicated \textbf{identity function} $\id_X:X\rightarrow X$. These functions are subject to the assumption that for every function $f:A\rightarrow B$ the composites $f \circ \id_A:A\rightarrow B$ and $\id_B \circ f: A \rightarrow B$ both are equal to the function $f$.
+	\end{axiom}
+	\begin{remark2}
+		In the light of definition \REF this axiom just states \enquote{There exists a category $\ncat{Set}$, whose objects we call \textit{sets} and whose morphisms we call \textit{functions}}.
+	\end{remark2}
+
+	\TODO{isomorphisms}
+
+	\newpage
+	\subsection{The Axioms of Primitive Sets and Emptyness}
+
+	Up until now basically everything could count as a category of sets. For example \TODO{terminal category}
+
+	\TODO{rework axiom, $\{0,1\}$ should have coprod UAE}
+
+	\begin{axiom}[Primitive Sets]
+		We declare that the category $\ncat{Set}$ has the following properties:
+		\begin{enumerate}[$-$]
+			\item{
+				There is a dedicated set $\ast$ called the \textbf{point} with the property that for every set $X$ there is a unique function $X\rightarrow \{\ast\}$.
+			}
+			\item{
+				There is a dedicated set $\emptyset$ called the \textbf{empty set} with the property that for every set $X$ there is a unique function $\emptyset \rightarrow X$.
+			}
+			\item{
+				There is a dedicated set $\{0,1\}$, which has precisely two distinct elements $0:\{\ast\}\rightarrow \{0,1\}$ and $1:\{\ast\}\rightarrow \{0,1\}$ and the property that for any set $X$ with given elements $x,x'\in X$ there exists a unique function $[x,x']:\{0,1\} \rightarrow X$ making the following diagram commute
+				\begin{equation*}
+					\begin{diagram}
+						\threebytwo[large]
+							{\{\ast\}}{\{0,1\}}{\{\ast\}}
+							{}{X}{}
+
+						\arrow{nw}{n}{0}[above]
+						\arrow{nw}{s}{x}[below left]
+						\arrow{ne}{n}{1}[above]
+						\arrow{ne}{s}{x'}[below right]
+						\arrow[dashed]{n}{s}{[x,x']}[ontop]
+					\end{diagram}
+				\end{equation*}
+			}
+			\item{
+				The three sets $\{\ast\}$, $\emptyset$ and $\{0,1\}$ are pairwise non-isomorphic.
+			}
+		\end{enumerate}
+	\end{axiom}
+
+	We should remark on why we chose to call the set $\emptyset$ the empty set. To do this we should give a precise definition of what it means to contain an element.
+
+	\begin{definition}
+		Given a set $X$ we call a function $x:\{\ast\} \rightarrow X$ an \textbf{element} of $X$. We often abbreviate notation in writing $x\in X$. For a function $f:X\rightarrow Y$ we often write $f(x)\in Y$ for the composite function $f\circ x: \{\ast\} \rightarrow Y$. \TODO{image preimage of element}
+
+		If there exists an element $x\in X$, the set $X$ is \textbf{inhabited}, otherwise we call it \textbf{uninhabited}.
+	\end{definition}
+
+	Now the fourth part of the axiom of primitive sets implies that the empty set is in fact empty.
+
+	\begin{lemma}
+		\label{lemEmptyUninhabited}
+		The empty set $\emptyset$ is uninhabited.
+	\end{lemma}
+	\begin{proof}
+		\textit{by contradiction}
+
+		Assume there exists an element $x\in\emptyset$, i.e. a function $x:\{\ast\} \rightarrow \emptyset$.
+		\begin{tab}
+			Then the composite function $\{\ast\} \xrightarrow{x} \emptyset \rightarrow \ast$ is a function from $\ast$ to itsself. Since the identity function $\id:\{\ast\}\rightarrow\{\ast\}$ is another function from the point to itsself, but by assumption there is a unique function from the terminal object to itsself, both functions are equal.
+
+			In the same way we can show that the composite function $\emptyset \rightarrow \{\ast\} \xrightarrow{x} \emptyset$ has to coincide with the identity function $\id_\emptyset:\emptyset \rightarrow \emptyset$.
+
+			This shows that the element $\{\ast\} \xrightarrow{x} \emptyset$ constitutes an isomorphism with inverse function $\emptyset \rightarrow \{\ast\}$, a contradiction to the fourth part of the axiom of primitive sets.\vspace{-1.5em}
+		\end{tab}
+	\end{proof}
+
+	\TODO{cannot show that uninhabited implies empty COUNTEREXAMPLE! have to put it as axiom}
+
+	\begin{axiom}[Emptyness $\dagger$]
+		We assert that the empty set $\emptyset$ is the unique uninhabited set in the sense that for every uninhabited set $X$ the unique morphism $\emptyset \rightarrow X$ is an isomorphism.
+	\end{axiom}
+
+	\begin{exercise}
+		\label{excUninhabitedIsInitial}
+		Show that for every uninhabited set $X$ and every set $Y$ there exists a unique function $X \rightarrow Y$. Deduce that every morphism between uninhabited sets is an isomorphism.
+	\end{exercise}
+
+
+	\TODO{diagram with two elements commutes if elements equal}
+
+	\TODO{constant functions}
+
+	\newpage
+	\subsection{The Axioms of Generation and Separation}
+
+	\TODO{intuition, explain parallel function}
+
+	\begin{axiom}[Generation and Separation]	
+		We declare that the category $\ncat{Set}$ has the following properties:
+		\begin{enumerate}[$-$]
+			\item{
+				Any two parallel functions $f,g:X\rightarrow Y$ are equal if and only if they agree on each point, i.e. if for every element $x\in X$ the elements $f(x) \in Y$ and $g(x)\in Y$ are equal.
+			}
+			\item{
+				For any set $X$ any two elements $x,x' \in X$ are equal, if and only if there exists a \textbf{separating function} $s:X\rightarrow \{0,1\}$ with the property that the following diagram commutes.
+				\begin{equation*}
+					\begin{diagram}
+						\threebytwo
+							{\{\ast\}}{X}{\{\ast\}}
+							{}{\{0,1\}}{}
+
+						\arrow{nw}{n}{x}[above]
+						\arrow{nw}{s}{0}[below left]
+						\arrow{ne}{n}{x'}[above]
+						\arrow{ne}{s}{1}[below right]
+						\arrow{n}{s}{s}[ontop]
+					\end{diagram}
+				\end{equation*}
+			}
+		\end{enumerate}
+	\end{axiom}
+
+	\begin{lemma}
+		\label{lemSingletonIsTerminal}
+		Any set $X$ with only one unique element $x\in X$ is isomorphic to the point.
+	\end{lemma}
+	\begin{proof}
+		There is a unique function $X \rightarrow \{\ast\}$ and the given element $x:\{\ast\}\rightarrow X$. We claim that these are inverse to each other. By the defining property of the point $\{\ast\}$, the composite $\{\ast\} \xrightarrow{x} X \rightarrow \{\ast\}$ equals the identity on $\{\ast\}$. But then the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\node (n) at (0,.75) {$X$};
+				\node (w) at (-2,0) {$\{\ast\}$};
+				\node (sw) at (-.75,-.75) {$X$};
+				\node (se) at (.75,-.75) {$\{\ast\}$};
+				\node (e) at (2,0) {$X$};
+
+				\arrow{w}{n}{x}[above left]
+				\arrow[bend left]{n}{e}{\id_X}[above right]
+				\arrow{w}{sw}{x}[below left]
+				\arrow{sw}{se}{}
+				\arrow{se}{e}{x}[below right]
+				\arrow[bend left]{w}{se}{\id_{\{\ast\}}}[right,ontop]
+			\end{diagram}
+		\end{equation*}
+		commutes. Since $x\in X$ is the unique point of $X$, the generation axiom ensures that the composite $X \rightarrow \{\ast\} \xrightarrow{x} X$ equals the identity function $\id_X$.
+	\end{proof}
+
+	\newpage
+	\subsection{Injective and Surjective Functions}
+
+	\TODO{motivate injection, surjection}
+
+	\begin{definition}
+		A function $f:X\rightarrow Y$ is \textbf{surjective}, if for every element $y\in Y$ there exists an (not necessarily unique) element $x\in X$ such that the evaluation $f(x) \in Y$ and the element $y\in Y$ are equal.
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{}{X}
+					{\{\ast\}}{Y}
+
+				\arrow{ne}{se}{f}[right]
+				\arrow[dashed]{sw}{ne}{x}[above left]
+				\arrow{sw}{se}{y}[below]
+			\end{diagram}
+		\end{equation*}
+		We indicate surjections as $f:X\twoheadrightarrow Y$.
+	\end{definition}
+
+	\begin{example}
+		\label{exSurjections}
+		Suppose that $X$ is inhabited by some element $x\in X$. Then the unique morphism $X\rightarrow \{\ast\}$ is surjective since the unique element $\ast \in \{\ast\}$ has the preimage $x \in X$.
+
+		However for an inhabited set $X$, the unique morphism $\emptyset \rightarrow X$ is \underline{not} surjective. Any preimage of $x\in X$ would make $\emptyset$ inhabited, contradicting lemma \ref{lemEmptyUninhabited}. More generally, any morphism out of an uninhabited set is \underline{not} surjective.
+
+		\TODO{isomorphism is surj}
+	\end{example}
+
+	\TODO{composition, cancellation}
+
+	\TODO{motivate epimorphism}
+
+	\begin{definition}
+		A function $X\rightarrow Y$ is a \textbf{epimorphism}, if it has the pre-cancellation property, i.e. if any two functions $t,t':Y\rightarrow T$ such that the composites $t \circ f$ and $t' \circ f$ agree are already equal.
+	\end{definition}
+
+	\TODO{example split epi}
+
+	\begin{lemma}
+		A function $f:X \rightarrow Y$ is surjective if and only if it is an epimorphism.
+	\end{lemma}
+	\begin{proof}
+		\begin{enumerate}
+			\item[($\Rightarrow$)]{
+				Suppose $f$ is surjective and that $t,t':Y\rightarrow T$ are functions such that the composites $t\circ f$ and $t'\circ f$ agree.
+
+				Since $f$ is surjective every $y \in Y$ admits a preimage $x\in X$ making the diagram
+				\begin{equation*}
+					\begin{diagram}
+						\fourbythree[low]
+							{}{}{Y}{}
+							{\{\ast\}}{X}{}{T}
+							{}{}{Y}{}
+
+						\arrow[bend left]{ww}{ne}{y}[above left]
+						\arrow{ne}{ee}{t}[above right]
+						\arrow[dashed]{ww}{w}{x}[above]
+						\arrow{w}{ne}{f}[above left]
+						\arrow{w}{se}{f}[below left]
+						\arrow[bend right]{ww}{se}{y}[below left]
+						\arrow{se}{ee}{t'}[below right]
+					\end{diagram}
+				\end{equation*}
+				commute. This means that $t$ and $t'$ agree on every element $y\in Y$, and thus are equal by the generation axiom. Therefore $f$ is an epimorphism.
+			}
+			\item[($\Leftarrow$)]{
+				For the converse assume that $f:X\rightarrow Y$ has the pre-cancellation property.
+
+				If $Y$ is uninhabited, so is $X$. Thus by exercise \ref{excUninhabitedIsInitial} $f$ is an isomorphism and in particular a surjection by example \ref{exSurjections}.
+
+				If $Y$ has precisely one element then it is isomorphic to the point by lemma \ref{lemSingletonIsTerminal}. The set $X$ must be inhabited, since otherwise by exercise \ref{excUninhabitedIsInitial} there exists a unique function $X \rightarrow \{0,1\}$, so the pre-cancellation property applied onto the two composites $X \rightarrow Y \xrightarrow{0} \{0,1\}$ and $X \rightarrow Y \xrightarrow{1} \{0,1\}$ would imply that the two elements $0\in\{0,1\}$ and $1\in \{0,1\}$ coincide, contradicting the axiom of primitive sets. Thus by example \ref{exSurjections} the function $f$ is surjective.
+
+				Finally, if $Y$ has at least two distinct elements $y,y'\in Y$, we assume that it is \underline{not} surjective and work towards a contradiction. Suppose
+
+				\TODO{finish}
+			}
+		\end{enumerate}
+	\end{proof}
+
+	\begin{exercise}
+		\label{excSurjLiftsAgainstInclZero}
+		Show that a morphism $f:X\rightarrow Y$ is a surjection, if and only if for every commutative square of functions as depicted below the unique function $Y \rightarrow \{\ast\}$ makes the two triangles commute.
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{X}{\{\ast\}}
+					{Y}{\{0,1\}}
+
+				\arrow{nw}{ne}{}
+				\arrow{sw}{se}{s}[below]
+				\arrow{nw}{sw}{f}[left]
+				\arrow{ne}{se}{1}[right]
+				\arrow[dashed]{sw}{ne}{}
+			\end{diagram}
+		\end{equation*}
+	\end{exercise}
+
+	\begin{definition}
+		A function $f:X\rightarrow Y$ is \textbf{injective}, if any two elements $x,x' \in X$ such that the values $f(x)\in Y$ and $f(x') \in Y$ agree are already equal.
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{\{0,1\}}{X}
+					{\{\ast\}}{Y}
+
+				\arrow{nw}{ne}{[x,x']}[above]
+				\arrow{sw}{se}{y}[below]
+				\arrow{nw}{sw}{}
+				\arrow{ne}{se}{f}[right]
+
+				\arrow[dashed]{sw}{ne}{}
+			\end{diagram}
+		\end{equation*}
+		We indicate injections as $f:X\hookrightarrow Y$.
+	\end{definition}
+
+	\begin{example}
+		Any function $\{\ast\} \rightarrow X$ is injective. This is trivially true, since $\{\ast\}$ has precisely one element, so every two preimages of an element in $X$ have to coincide.
+
+		The function $\{0,1\} \rightarrow \{\ast\}$ is \underline{not} injective. The unique element $\ast\in \{\ast\}$ has both $0\in \{0,1\}$ and $1 \in \{0,1\}$ as preimages, since the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\threebytwo
+					{\{\ast\}}{\{0,1\}}{\{\ast\}}
+					{}{\{\ast\}}{}
+
+				\arrow{nw}{n}{0}[above]
+				\arrow{nw}{s}{\ast}[below left]
+				\arrow{ne}{n}{1}[above]
+				\arrow{ne}{s}{\ast}[below right]
+				\arrow{n}{s}{}
+			\end{diagram}
+		\end{equation*}
+		commutes by the uniqueness property of functions into $\{0,1\}$. But by assumption on the Boolean set $\{0,1\}$ the elements $0\in\{0,1\}$ and $1\in\{0,1\}$ are distinct.
+	\end{example}
+
+	\TODO{isomorphism is inj}
+
+	\TODO{composition, cancellation, motivate monomorphism}
+
+	\begin{definition}
+		A function $X \rightarrow Y$ is a \textbf{monomorphism}, if it has the post-cancellation property, i.e. if any two functions $t,t':T\rightarrow X$ such that the composites $f\circ t$ and $f\circ t'$ agree are already equal.
+	\end{definition}
+
+	\TODO{example split mono}
+
+	\begin{lemma}
+		A function $f:X\rightarrow Y$ is injective if and only if it is a monomorphism.
+	\end{lemma}
+	\begin{proof}
+		\begin{enumerate}
+			\item[($\Leftarrow$)]{
+				The post-cancellation property specializes to elements $x,x':\{\ast\}\rightarrow X$.
+			}
+			\item[($\Rightarrow$)]{
+				Suppose that $f:X\rightarrow Y$ is an injection and that $T$ is an arbitrary set. Let $t,t':T\rightarrow X$ be two functions so that $f\circ t$ and $f\circ t'$ agree. Every element $w\in T$ gives rise to a diagram
+				\begin{equation*}
+					\begin{diagram}
+						\fourbythree[low]
+							{}{T}{}{}
+							{\{\ast\}}{}{X}{Y}
+							{}{T}{}{}
+
+						\arrow{ww}{nw}{w}[above left]
+						\arrow{nw}{e}{t}[above right]
+						\arrow{ww}{sw}{w}[below left]
+						\arrow{sw}{e}{t'}[below right]
+						\arrow[bend left]{nw}{ee}{f\circ t}[above right]
+						\arrow{e}{ee}{f}[above]
+						\arrow[bend right]{sw}{ee}{f\circ t'}[below right]
+					\end{diagram}
+				\end{equation*}
+				in which everything but the left square commutes by assumption and the left square commutes by $f$ being an injection. But this shows that $t$ and $t'$ agree on every element $w\in T$, hence have to be equal by the generation axiom.
+			}
+		\end{enumerate}
+	\end{proof}
+
+	\begin{exercise}
+		Show that a function $f:X\rightarrow Y$ is an injection, if and only if for every commutative square of functions as depicted below there exists some function $Y \rightarrow \{0,1\}$ which makes the two triangles commute.
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{X}{\{0,1\}}
+					{Y}{\{\ast\}}
+
+				\arrow{nw}{ne}{s}[above]
+				\arrow{sw}{se}{}[]
+				\arrow{nw}{sw}{f}[left]
+				\arrow{ne}{se}{}[right]
+				\arrow[dashed]{sw}{ne}{s'}[above left]
+			\end{diagram}
+		\end{equation*}
+	\end{exercise}
+
+	\newpage
+	\subsection{The Axioms of Balance and Image Factorizations}
+
+	\TODO{discuss bijection}
+
+	\begin{exercise}
+		\label{excSplitEpiMonoIsIso}
+		Show that a monomorphism, which is split epic, is an isomorphism. Show that an epimorphism, which is split monic, is an isomorphism.
+	\end{exercise}
+
+	\TODO{motivate balance}
+
+	\begin{axiom}[Balance $\dagger$]
+		Every bijection is an isomorphism.
+	\end{axiom}
+
+	\TODO{Would like to be unique}
+
+	\begin{exercise}
+		Let $f:X\rightarrow Y$ be a function, which is an isomorphism.\\ Show that the inverse function $f^{-1}:Y\rightarrow X$ is unique.
+	\end{exercise}
+
+	\TODO{motivate image factorization}
+
+	\begin{axiom}[Image Factorization $\dagger$]
+		Every function $f:X\rightarrow Y$ can be written as a composite function $i \circ p$, in which $p: X \rightarrow \Img(f)$ is a surjection and $\Img(f) \rightarrow Y$ is an injection. We assert that this factorization is unique in the sense that for every other factorization of $f$ into a surjection $p':X\rightarrow I$ and an injection $i':I \rightarrow Y$ there is some function $c:\Img(f) \rightarrow I$ making the following diagram commute.
+		\begin{equation*}
+			\begin{diagram}
+				\threebythree[low]
+					{}{\Img(f)}{}
+					{X}{}{Y}
+					{}{I}{}
+
+				\arrow[epi]{w}{n}{p}[above left]
+				\arrow[incl]{n}{e}{i}[above right]
+				\arrow[epi]{w}{s}{p'}[below left]
+				\arrow[incl]{s}{e}{i'}[below right]
+				\arrow[dashed]{n}{s}{c}[ontop]
+			\end{diagram}
+		\end{equation*}
+	\end{axiom}
+
+	\begin{exercise}
+		Show that the comparison function $c:\Img(f) \rightarrow I$ in the previous axiom is uniquely determined. Show that it is a bijection and thus an isomorphism.
+	\end{exercise}
+
+	\TODO{functorial factorizations?}
+
+	\TODO{epi-mono WFS?}
+
+	\TODO{discuss subsets, image of a subset, introduce existential quantifier}
+
+	\newpage
+	\subsection{The Axioms of Products and Sums}
+
+	\begin{axiom}[Products]
+		For any two sets $X$ and $Y$ there exists the \textbf{product} set $X\times Y$ and two functions $\pr_X:X\times Y \rightarrow X$ and $\pr_Y:X\times Y\rightarrow Y$ called \textbf{projections}, satisfying that for any set $T$ and functions $f:T\rightarrow X$ and $g:T\rightarrow Y$ there exists a unique function $(f,g):T\rightarrow X\times Y$ making the following diagram commute.
+		\begin{equation*}
+			\begin{diagram}
+				\threebytwo[high]
+					{}{T}{}
+					{X}{X\times Y}{Y}
+
+				\arrow{n}{sw}{f}[above left]
+				\arrow[dashed]{n}{s}{(f,g)}[ontop]
+				\arrow{n}{se}{g}[above right]
+				\arrow{s}{sw}{\pr_X}[below]
+				\arrow{s}{se}{\pr_Y}[below]
+			\end{diagram}
+		\end{equation*}
+	\end{axiom}
+
+	\TODO{product with terminal, associativity, commutativity, diagonal}
+
+	\begin{axiom}[Sums]
+		For any two sets $X$ and $Y$ there exists their \textbf{sum} $X+ Y$ and two functions $\incl_X:X \rightarrow X+y$ and $\incl_Y:Y\rightarrow X+Y$ called \textbf{inclusions}, satisfying that for any set $T$ and functions $f:X\rightarrow T$ and $g:Y\rightarrow T$ there exists a unique function $[f,g]:X+Y\rightarrow T$ making the following diagram commute.
+		\begin{equation*}
+			\begin{diagram}
+				\threebytwo[high]
+					{X}{X\times Y}{Y}
+					{}{T}{}
+
+				\arrow{nw}{n}{\incl_X}[above]
+				\arrow{ne}{n}{\incl_Y}[above]
+
+				\arrow{nw}{s}{f}[below left]
+				\arrow[dashed]{n}{s}{[f,g]}[ontop]
+				\arrow{ne}{s}{g}[below right]
+			\end{diagram}
+		\end{equation*}
+	\end{axiom}
+
+	\TODO{sum with empty, associativity, commutativity, codiagonal}
+
+	\begin{lemma}[Sums are disjoint]
+		Let $X+Y$ be the sum of two sets $X$ and $Y$. Every element $t\in X+Y$ is either the image of an element $x\in X$ under $\incl_X$ or the image of an element $y\in Y$ under $\incl_Y$.
+	\end{lemma}
+	\begin{proof}
+		\TODO{WLOG} both $X$ and $Y$ inhabited.
+
+		Assume $t\in X+Y$ is an element, which is neither the image of some $x\in X$ nor the image of some $y\in Y$. \TODO{By separation} there is a function $s:X+Y\rightarrow \{0,1\}$, which sends the element $t\in X+Y$ to $1\in\{0,1\}$ and every other element of $X+Y$ to $0\in\{0,1\}$. Furthermore we have the constant zero function $\const_0:X+Y\rightarrow \{0,1\}$. The two functions are distinct, since they differ in their value at $t\in X+Y$. Meanwhile both functions make the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\threebytwo
+					{X}{X+Y}{Y}
+					{}{\{0,1\}}{}
+
+				\arrow{nw}{n}{\incl_X}[above]
+				\arrow{ne}{n}{\incl_Y}[above]
+				\arrow{nw}{s}{\const_0}[below left]
+				\arrow[dashed]{n}{s}{}
+				\arrow{ne}{s}{\const_0}[below right]
+			\end{diagram}
+		\end{equation*}
+		commute, since both composites $\const_0 \circ \incl_X$ and $s \circ \incl_X$ evaluate to $0\in \{0,1\}$ for every element of $X$ and analogously for $Y$. This contradicts the uniqueness in the definition of a sum of sets.
+
+		Now assume that there exists an element $t\in X+Y$, which is both the image of an element $x\in X$ and an element $y\in Y$. The constant functions $\const_1:X \rightarrow \{0,1\}$ and $\const_0:Y\rightarrow \{0,1\}$ induce a unique function $\bbOne_X:X+Y\rightarrow \{0,1\}$ making the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\threebythree[wide]
+					{}{\{\ast\}}{}
+					{X}{X+Y}{Y}
+					{}{\{0,1\}}{}
+
+				\arrow{n}{w}{x}[above left]
+				\arrow{n}{c}{t}[ontop]
+				\arrow{n}{e}{y}[above right]
+
+				\arrow{w}{c}{\incl_X}[above]
+				\arrow{e}{c}{\incl_Y}[above]
+
+				\arrow{w}{s}{\const_1}[below left]
+				\arrow{c}{s}{\bbOne_X}[ontop]
+				\arrow{e}{s}{\const_0}[below right]
+			\end{diagram}
+		\end{equation*}
+		commute. This is impossible, since the two elements $0\in \{0,1\}$ and $1\in\{0,1\}$ are distinct.
+	\end{proof}
+
+	\begin{exercise}
+		\label{excTwoPlusTwoIsTwoTimesTwo}
+		Show that there is a bijection between $\{0,1\}+\{0,1\}$ and $\{0,1\}\times\{0,1\}$. \\
+		\textit{Hint: Don't forget the universal property of $\{0,1\}$.}
+	\end{exercise}
+	\begin{exercise2}
+		Show that for every set $X$ there is a bijection between $X+X$ and $X\times\{0,1\}$.\\
+		\textit{Hint: Use the universal property of the product to obtain maps $X\rightarrow X\times\{0,1\}$.}
+	\end{exercise2}
+
+	\newpage
+	\subsection{Boolean Logic}
+
+	\TODO{formally introduce terms}
+
+	We have enough tools at hand to give an exhaustive list of all functions $\{0,1\} \rightarrow \{0,1\}$. The universal property of $\{0,1\}$ ensures that all of the following functions exist, while the generation axiom implies that they are distinct.
+
+	\begin{equation*}
+		\begin{array}{rcl}
+			\{0,1\} & \xrightarrow{\false} & \{0,1\}\\
+			0 & \longmapsto & 0\\
+			1 & \longmapsto & 0
+		\end{array}
+		\begin{array}{rcl}
+			\{0,1\} & \xrightarrow{\id} & \{0,1\}\\
+			0 & \longmapsto & 0\\
+			1 & \longmapsto & 1
+		\end{array}
+		\begin{array}{rcl}
+			\{0,1\} & \xrightarrow{t\lnot} & \{0,1\}\\
+			0 & \longmapsto & 1\\
+			1 & \longmapsto & 0
+		\end{array}
+		\begin{array}{rcl}
+			\{0,1\} & \xrightarrow{\true} & \{0,1\}\\
+			0 & \longmapsto & 1\\
+			1 & \longmapsto & 1
+		\end{array}
+	\end{equation*}
+
+	Similarly exercise \ref{excTwoPlusTwoIsTwoTimesTwo} provides us with a method to construct functions out of the set $\{0,1\}\times\{0,1\}$. We could give an exhaustive list of all functions $\{0,1\}\times\{0,1\} \rightarrow \{0,1\}$, but we refrain from doing so and focus on just the following examples.
+
+	\begin{definition}
+		A \textbf{term} in $n$ variables is a function $t:\{0,1\}^{\times n} \rightarrow \{0,1\}$ represented by a specific choice of composites of the logical connectives above and diagonal functions. Two terms are \textbf{tautologically equivalent}, if they represent the same function. A term is a \textbf{tautology}, if it is \textbf{tautologically equivalent} to the term $\mathbf{1}$.
+	\end{definition}
+
+	\begin{example}
+		The term $x\lor \lnot x$ is a tautology. It describes the function
+		% \begin{equation*}
+		% 	\begin{array}{rcccl}
+		% 	\{0,1\} &\xrightarrow{\Delta} &\{0,1\}\times\{0,1\} &\xrightarrow{\land} & \{0,1\}\\
+		% 	x & \mapsto & (x,x)\\
+		% 	&&(x_1,x_2) & \mapsto & x_1 \land x_2
+		% 	\end{array}
+		% \end{equation*}
+		% which is equal to the constant function
+	\end{example}
+
+	\TODO{any function is represented by a term, coprod models OR!}
+
+
+	\TODO{Discuss propositions, and, or, xor}
+
+
+	\newpage
+	\subsection{The Axiom of Intersections}
+
+	\TODO{motivate intersections}
+
+	\begin{axiom}[Intersections]
+		For every pair of functions $f:X\rightarrow Z$ and $g:Y\rightarrow Z$ with the same codomain there exists a dedicated set called the \textbf{pullback} of $f$ and $g$, which we denote by
+		\begin{equation*}
+			X \pb{f}{g} Y \hspace{1cm}\text{or}\hspace{1cm} \{(x,y)\in X\times Y \mid f(x)=g(y)\}
+		\end{equation*}
+		together with functions
+		\begin{equation*}
+			\pr_X:X\pb{f}{g} Y \rightarrow X \hspace{1cm}\text{and}\hspace{1cm} \pr_Y:X\pb{f}{g}Y \rightarrow Y
+		\end{equation*}
+		with the universal property that for every pair of functions $x:T\rightarrow X$ and $y:T\rightarrow Y$, which make the square
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{T}{Y}
+					{X}{Z}
+
+				\arrow{nw}{ne}{y}[above]
+				\arrow{sw}{se}{f}[below]
+				\arrow{nw}{sw}{x}[left]
+				\arrow{ne}{se}{g}[right]
+			\end{diagram}
+		\end{equation*}
+		there exists a unique function $t:T\rightarrow X\pb{f}{g}Y$ making the following diagram commute.
+		\begin{equation*}
+			\begin{diagram}
+				\threebythree
+					{T}{}{}
+					{}{X\pb{f}{g}Y}{Y}
+					{}{X}{Z}
+
+				\arrow[bend right]{nw}{s}{x}[below left]
+				\arrow[dashed]{nw}{c}{t}[ontop]
+				\arrow[bend left]{nw}{e}{y}[above right]
+
+				\arrow{c}{e}{\pr_Y}[above]
+				\arrow{s}{se}{f}[below]
+				\arrow{c}{s}{\pr_X}[left]
+				\arrow{e}{se}{g}[right]
+			\end{diagram}
+		\end{equation*}
+	\end{axiom}
+
+	\begin{remark}
+		There universal property of the product $X\times Y$ yields a unique function $X\pb{f}{g}Y \rightarrow X\times Y$ making the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\threebytwo[high]
+					{}{X\pb{f}{g}Y}{}
+					{X}{X\times Y}{Y}
+
+				\arrow{n}{sw}{\pr_X}[above left]
+				\arrow{n}{s}{i_{f=g}}[ontop]
+				\arrow{n}{se}{\pr_Y}[above right]
+				\arrow{s}{sw}{\pr_X}[below]
+				\arrow{s}{se}{\pr_Y}[below]
+			\end{diagram}
+		\end{equation*}
+		commute. This function is an injection: Take two elements $t,t'\in X\pb{f}{g} Y$ which evaluate under $i_{f=g}:X\pb{f}{g}Y\rightarrow X\times Y$ to the same element $(x,y)\in X\times Y$, or more specifically make the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\threebythree
+					{}{\{\ast\}}{}
+					{}{X\pb{f}{g}Y}{}
+					{}{X\times Y}{}
+
+				\arrow[bend right]{n}{sw}{x}[above left]
+				\arrow{n}{c}{t,t'}[ontop]
+				\arrow[bend left]{n}{se}{y}[above right]
+
+				\arrow{c}{sw}{\pr_X}[above left]
+				\arrow{c}{s}{i_{f=g}}[ontop]
+				\arrow{c}{se}{\pr_Y}[above right]
+
+				\arrow{s}{sw}{\pr_X}[below]
+				\arrow{s}{se}{\pr_Y}[below]
+			\end{diagram}
+		\end{equation*}
+		commute. But then both $t$ and $t'$ make the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\threebythree
+					{\{\ast\}}{}{}
+					{}{X\pb{f}{g}Y}{Y}
+					{}{X}{Z}
+
+				\arrow[bend right]{nw}{s}{x}[below left]
+				\arrow[dashed]{nw}{c}{t}[ontop]
+				\arrow[bend left]{nw}{e}{y}[above right]
+
+				\arrow{c}{e}{\pr_Y}[above]
+				\arrow{s}{se}{f}[below]
+				\arrow{c}{s}{\pr_X}[left]
+				\arrow{e}{se}{g}[right]
+			\end{diagram}
+		\end{equation*}
+		commute and hence have to coincide.
+	\end{remark}
+
+	\begin{example}
+		\label{exIntersectionAsPb}
+		\TODO{Intersection of subsets, disjoint}
+	\end{example}
+
+	\begin{example}
+		\TODO{Preimage}
+	\end{example}
+
+	\begin{example}
+		\TODO{Fiber}
+	\end{example}
+
+	\begin{lemma}
+		\label{lemInjFibCrit}
+		A function $f:X\rightarrow Y$ is injective if and only if for every element $y\in Y$ the fiber $f^{-1}(\{y\})$ is either empty or a singleton.
+	\end{lemma}
+	\begin{proof}
+		\TODO{todo}
+	\end{proof}
+
+	\begin{exercise}
+		\label{excSurjFibCrit}
+		Show that a function $f:X\rightarrow Y$ is surjective, if and only if for every element $y\in Y$ the fiber $f^{-1}(\{y\})$ is inhabited.
+
+		Deduce that a function $f:X\rightarrow Y$ is a bijection, if and only if for every element $y\in Y$ the fiber $f^{-1}(\{y\})$ is a singleton.
+	\end{exercise}
+
+	\begin{example}
+		\TODO{graph of function}
+	\end{example}
+
+	\TODO{Properties of pullbacks}
+
+
+	\newpage
+	\subsection{The Axiom of Characteristic Functions}
+	\TODO{Subobjects? Complements? Balanced? Implies Separation}
+
+	\begin{axiom}[Characteristic Functions]
+		We assert that for every injection $i_A:A\hookrightarrow X$ there exists a uniquely determined \textbf{characteristic function} $\chi_A:X\rightarrow \{0,1\}$, which makes the square
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{A}{\{\ast\}}
+					{X}{\{0,1\}}
+
+				\arrow{nw}{ne}{}
+				\arrow{sw}{se}{\chi_A}[below]
+				\arrow{nw}{sw}{i_A}[left]
+				\arrow{ne}{se}{1}[right]
+			\end{diagram}
+		\end{equation*}
+		commute and makes $i_A$ the fiber of $\chi_A$ at $1\in \{0,1\}$.
+	\end{axiom}
+
+	\TODO{element in $A$ iff $\chi_A(x) = 1$}
+
+	\begin{exercise}
+		Show that the axiom of characteristic functions implies the axiom of separating functions.
+	\end{exercise}
+
+	\begin{lemma}
+		The axiom of characteristic functions implies the axiom of balance.
+	\end{lemma}
+	\begin{proof}
+		Let $f:X\rightarrow Y$ be a bijective function. Since it is an injection there exists a characteristic function $\chi_X:Y\rightarrow \{0,1\}$ making the square
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{X}{\{\ast\}}
+					{Y}{\{0,1\}}
+
+				\arrow{nw}{ne}{}
+				\arrow{sw}{se}{\chi_X}[below]
+				\arrow{nw}{sw}{f}[left]
+				\arrow{ne}{se}{1}[right]
+				\arrow[dashed]{sw}{ne}{}
+			\end{diagram}
+		\end{equation*}
+		commute. Since $f$ is surjective by exercise \ref{excSurjLiftsAgainstInclZero} the unique function $Y\rightarrow\{\ast\}$ makes the whole diagram above commute. This means that the outer square of the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\threebythree
+					{Y}{}{}
+					{}{X}{\{\ast\}}
+					{}{Y}{\{0,1\}}
+
+				\arrow[bend right,equals]{nw}{s}{}
+				\arrow[dashed]{nw}{c}{g}[ontop]
+				\arrow[bend left]{nw}{e}{}
+
+				\arrow{c}{e}{}
+				\arrow{s}{se}{\chi_X}[below]
+				\arrow{c}{s}{f}[left]
+				\arrow{e}{se}{}
+			\end{diagram}
+		\end{equation*}
+		commutes and by the universal property of the fiber $X=\chi^{-1}(\{1\})$ there exists a function $g:Y\rightarrow X$, which makes the whole diagram commute. This renders $f$ split epic and since it is injective it is an isomorphism by exercise \ref{excSplitEpiMonoIsIso}.
+	\end{proof}
+
+	\begin{example}
+		Let $A \subseteq X$ be a subset with inclusion $i_A:A\rightarrow X$ classified by $\chi_A:X\rightarrow\{0,1\}$. The \textbf{complement} of $A \subseteq X$ is the subset $X \setminus A \subseteq X$ classified by $X\xrightarrow{\chi_A} \{0,1\} \xrightarrow{\lnot} \{0,1\}$. Equivalently it is the fiber of $\chi_A$ at $0\in\{0,1\}$.
+	\end{example}
+
+	\begin{lemma}
+		Given the inclusion of a subset $i_A:A\rightarrow X$ and an inclusion of its complement $i_{X\setminus A}:X\setminus A \rightarrow X$ the canonical function $[i_A,i_{X\setminus A}]:A + X\setminus A \rightarrow X$ induced by the two inclusions is a bijection.
+	\end{lemma}
+	\begin{proof}
+		The inclusions $i_A$ and $i_{X\setminus A}$ are classified by characteristic functions $\chi_A:X\rightarrow \{0,1\}$ and $\chi_{X\setminus A}:X\xrightarrow{\chi_A} \{0,1\} \xrightarrow{\lnot} \{0,1\}$.
+
+		Pick an element $x\in X$, then either $\chi_A(x)=1$ or $\chi_A(x)=0$ holds. This means that $x\in X$ can be regarded either as an element of the fiber $A = f^{-1}(\{1\})$ or the fiber $X\setminus A = f^{-1}(\{0\})$. This shows that the induced function $[i_A,i_{X\setminus A}]:X+X\setminus A \rightarrow X$ is surjective.
+
+		Take two elements $x,x'\in A+X\setminus A$ such that $[i_A,i_{X\setminus A}](x) = [i_A,i_{X\setminus A}](x') \in X$. Postcomposing with $\chi_A:X\rightarrow\{0,1\}$ we find that \TODO{finish} 
+	\end{proof}
+
+	\begin{exercise}
+		Let $X$ be an inhabited set. Show that an inclusion $A \rightarrow X$ is a split monic if and only if $A$ is inhabited.
+	\end{exercise}
+
+	\TODO{remark on AC}
+
+	\begin{example}
+		Consider two subsets $A,B\subseteq X$ with classifying characteristic functions $\chi_A:X\rightarrow\{0,1\}$ and $\chi_B:X\rightarrow\{0,1\}$. The subset classified by the composite function $X\xrightarrow{(\chi_A,\chi_B)} \{0,1\}\times\{0,1\} \xrightarrow{\land} \{0,1\}$ is the \textbf{intersection} $A\cap B \subseteq X$ defined in example \ref{exIntersectionAsPb}.
+
+		\TODO{proof}
+	\end{example}
+
+	\begin{example}
+		\label{exUnionOfSubsets}
+		Consider two subsets $A,B \subseteq X$ with classifying characteristic functions $\chi_A:X\rightarrow\{0,1\}$ and $\chi_B:X\rightarrow\{0,1\}$. The subset classified by the composite function $X\xrightarrow{(\chi_A,\chi_B)} \{0,1\}\times\{0,1\} \xrightarrow{\lor} \{0,1\}$ is the \textbf{union} $A\cup B \subseteq X$ of the subsets.
+
+		\TODO{has inclusions $j_A: A \rightarrow A\cup B$ and $j_B: B \rightarrow A\cup B$}
+
+		\TODO{show that it is image of $A+B\rightarrow X$}
+	\end{example}
+
+
+	\newpage
+	\subsection{The Axiom of Unions}
+
+	\TODO{introduce pushouts}
+
+	\begin{lemma}
+		Consider two subsets $A,B\subseteq X$. The commutative square
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{A\cap B}{B}
+					{A}{A\cup B}
+
+				\arrow{nw}{ne}{k_B}[above]
+				\arrow{sw}{se}{j_A}[below]
+				\arrow{nw}{sw}{k_A}[left]
+				\arrow{ne}{se}{j_B}[right]
+			\end{diagram}
+		\end{equation*}
+		of example \ref{exUnionOfSubsets} is both a pullback and a pushout.
+	\end{lemma}
+	\begin{proof}
+		\TODO{pullback, since $A\cup B \rightarrow X$ is mono}
+
+		\TODO{pushout, since actual pushout provides epi-mono factorization}
+	\end{proof}
+
+	\TODO{coequalizer}
+
+	\begin{proposition2}
+		The axiom of image factorizations is obsolete.
+	\end{proposition2}
+	\begin{proof}
+		\TODO{use proof of topos seminar?}
+	\end{proof}
+
+
+	\newpage
+	\subsection{The Axiom of Sets of Functions}
+
+	\TODO{motivate cartesian closure and currying}
+
+	\TODO{$\Map(T,X\times Y) \cong \Map(T,X)\times\Map(T,Y)$}
+
+	\TODO{$\Map(T,-)$ conservative?}
+
+	\begin{exercise}
+		A function $f:X\rightarrow Y$ is an isomorphism, if and only if for every set $T$ the induced function $f_\ast:\Map(T,X)\rightarrow\Map(T,Y)$ is an isomorphism.
+	\end{exercise}
+
+	\newpage
+	\subsection{Relations}
+
+	\begin{definition}
+		A \textbf{relation} on a set $X$ is a subset $R \subseteq X\times X$. It is
+		\begin{enumerate}[$\bullet$]
+			\item{
+				\textbf{reflexive}, if for every element $x\in X$ the element $(x,x) \in X\times X$ is contained in $R$.
+			}
+			\item{
+				\textbf{symmetric}, if for every element $(x,y)\in R$ the element $(y,x)\in X\times X$ is contained in $R$.
+			}
+			\item{
+				\textbf{antisymmetric}, if for every element $(x,y)\in R$ such that $(y,x)\in R$ already $x=y \in X$ holds.
+			}
+			\item{
+				\textbf{transitive}, if for any two elements $(x,y)\in R$ and $(y,z) \in R$ the element $(x,z) \in X\times X$ is contained in $R$.
+			}
+		\end{enumerate}
+		Given a relation $R$ on a set $X$ with subset inclusion $i_R:R\rightarrow X\times X$, its \textbf{opposite relation} $R^\op$ on $X$ is the relation defined by the subset inclusion $R \xrightarrow{i_R} X\times X \xrightarrow{(12)} X\times X$.
+	\end{definition}
+
+	\TODO{motivate categorical reformulation: constructing functions is hard}
+
+	\begin{remark}
+		Consider a set $X$ and a subset $R\subseteq X\times X$ with given inclusion $i_R:R\rightarrow X\times X$. Above properties admit a \TODO{more categorical} formulation.
+		\begin{enumerate}[$\bullet$]
+			\item{
+				The relation $R$ is reflexive in the above sense, if and only if the diagonal morphism $\Delta_X: X\rightarrow X\times X$ factors via $i_R:R\rightarrow X\times X$, i.e. the lifting problem depicted on the right admits a solution. \TODO{diagram}
+
+				This is because the reflexivity condition above is by the generation axiom equivalent to the commutativity of the outer square in the diagram
+				\begin{equation*}
+					\begin{diagram}
+						\threebythree
+							{X}{}{}
+							{}{R}{\{\ast\}}
+							{}{X\times X}{\{0,1\}}
+
+						\arrow[bend right]{nw}{s}{\Delta_X}[below left]
+						\arrow[dashed]{nw}{c}{}
+						\arrow[bend left]{nw}{e}{}
+
+						\arrow{c}{e}{}
+						\arrow{s}{se}{\chi_R}[below]
+						\arrow{c}{s}{i_R}[left]
+						\arrow{e}{se}{1}[right]
+					\end{diagram}
+				\end{equation*}
+				which by the universal property of the pullback $R$ is equivalent to the existence of the dashed arrow.
+			}
+			\item{
+				\TODO{symmetry similar, exercise?}
+			}
+			\item{
+				\TODO{antisymmetry, exercise?}
+				\begin{equation*}
+					\begin{diagram}
+						\threebythree
+							{R\pb{i_R}{i_{R^\op}} R^\op}{}{R^\op}
+							{}{X}{}
+							{R}{}{X\times X}
+
+						\arrow{nw}{ne}{}
+						\arrow{sw}{se}{i_R}[below]
+						\arrow{nw}{sw}{}
+						\arrow{ne}{se}{i_{R^\op}}[right]
+
+						\arrow[dashed]{nw}{c}{}
+						\arrow{c}{se}{\Delta_X}[ontop]
+					\end{diagram}
+				\end{equation*}
+			}
+			\item{
+				\TODO{transitivity, not so easy, prove self}
+				\begin{equation*}
+					\begin{diagram}
+						\twobytwo
+							{R\pb{\pr_2}{\pr_1} R}{R}
+							{R}{X}
+
+						\arrow{nw}{ne}{}
+						\arrow{sw}{se}{\pr_2}[below]
+						\arrow{nw}{sw}{}
+						\arrow{ne}{se}{\pr_1}[right]
+					\end{diagram}
+					\begin{diagram}
+						\twobytwo[wide]
+							{}{R}
+							{R\pb{\pr_2}{\pr_1} R}{X\times X}
+
+						\arrow{sw}{se}{?}
+						\arrow{ne}{se}{i_R}[right]
+						\arrow[dashed]{sw}{ne}{}
+					\end{diagram}
+				\end{equation*}
+			}
+		\end{enumerate}
+	\end{remark}
+
+	\TODO{more categorical formulation? see nlab-correspondence}
+
+	\begin{definition}
+		An \textbf{equivalence relation} on $X$ is a reflexive, transitive and symmetric relation.
+	\end{definition}
+
+	\TODO{quotient by equivalence relation}
+
+	\TODO{char of equivalence relations as pb of identity relation along surj, char of surjection}
+
+	\begin{definition}
+		A \textbf{partial order} $P$ on a set $X$ is a reflexive, transitive and antisymmetric relation. 
+
+		It is a \textbf{total order}, if for every element $(x,y) \in X\times X$ we have that $(x,y)\in P$ or $(y,x) \in P$.
+	\end{definition}
+
+	\begin{example}
+		The set $\{0,1\}$ can be equipped with the total order $\leq\; := \{(0,0),(0,1),(1,1)\} \subseteq \{0,1\}^{\times 2}$, which we call the \textbf{standard order}. \TODO{depict, opposite order}
+	\end{example}
+	\begin{example}
+		The set $\{0,1\}^{\times 2}$ has a partial order \TODO{grid and lexicographic}
+	\end{example}
+
+	\begin{exercise}
+		\label{excMapsIntoPoset}
+		Let $(P,\preceq)$ be a partially ordered set and $X$ an arbitrary set. Show that the characteristic function
+		\begin{equation*}
+			asd
+		\end{equation*}
+		defines a partial order on $\Map(X,P)$.
+	\end{exercise}
+
+	\TODO{lattices and Knaster-Tarski FPT?}
+
+	\newpage
+	\subsection{Powersets, First Order Logic and the Subobject Lattice}
+
+	\TODO{recall characteristic functions}
+
+	\begin{definition}
+		The \textbf{powerset} of a set $X$ is the set $\mathcal{P}(X) := \Map(X,\{0,1\})$.
+	\end{definition}
+
+	\begin{exercise}
+		How many subsets does $\{0,1\}$ have? How many subsets does $\{0,1,2\} = \{\ast\}+\{\ast\}+\{\ast\}$ have?
+	\end{exercise}
+
+	\begin{remark}
+		The functions
+		\begin{align*}
+			\cap_X:&\mathcal{P}(X)\times\mathcal{P}(X)\cong \Map(X,\{0,1\}\times\{0,1\}) \xrightarrow{\land_\ast} \mathcal{P}(X)\\
+			\cup_X:&\mathcal{P}(X)\times\mathcal{P}(X)\cong \Map(X,\{0,1\}\times\{0,1\}) \xrightarrow{\lor_\ast} \mathcal{P}(X)
+		\end{align*}
+		map subsets $A,B\subseteq X$ to their intersection $A\cap_X B \subseteq X$ respectively union $A \cup_X B \subseteq X$. The function
+		\begin{equation*}
+			\lnot_X: \mathcal{P}(X) \xrightarrow{\lnot_\ast} \mathcal{P}(X)
+		\end{equation*}
+		sends a subset $A\subseteq X$ to its complement $\lnot_X A \subseteq X$.
+	\end{remark}	
+
+	\TODO{$X$ and $\emptyset$ as neutral elements, distributivity (follows from boolean tautologies)}
+
+	\begin{remark}
+		By exercise \ref{excMapsIntoPoset} the powerset $\mathcal{P}(X)=\Map(X,\{0,1\})$ inherits a partial order from the standard order on $\{0,1\}$ called the \textbf{partial order by inclusion}. This is legitimized by the fact that for subsets $A,B\subseteq X$ the following assertions are equivalent:
+		\begin{enumerate}
+			\item{
+				There exists a (necessarily injective) function making the triangle on the right commute. \TODO{triangle}
+			}
+			\item{
+				The characteristic functions satisfy $\chi_A \leq \chi_B$ with respect to the partial order by inclusion.
+			}
+		\end{enumerate}
+	\end{remark}
+
+	\TODO{minmal element $\emptyset$, maximal element $X$, joins $\cup$ and meets $\cap$}
+
+	\TODO{compatibility with $\cap$ and $\cup$ (partially ordered monoid)}
+
+	\begin{exercise2}
+		Every function $f:X\rightarrow Y$ induces an order-preserving map $f^{-1}[-]:\mathcal{P}(Y)\rightarrow\mathcal{P}(X)$, which maps a subset $B\subseteq Y$ to its preimage $f^{-1}[B] \subseteq X$ under $f$.
+
+		\TODO{functorial}
+	\end{exercise2}
+
+	\begin{proposition}
+		Every function $f:X\rightarrow Y$ induces an order-preserving map $f[-]:\mathcal{P}(X) \rightarrow \mathcal{P}(Y)$, which maps a subset $A\subseteq X$ to its image $f[A] \subseteq Y$ under $f$.
+
+		\TODO{functorial}
+	\end{proposition}
+
+	\TODO{preimage-image adjunction}
+
+	\TODO{examples and counterexamples for intersections and stuff}
+
+	\begin{definition}
+		For any set $X$ there exists the \textbf{singleton map} $X \xrightarrow{\{-\}} \mathcal{P}(X)$, which sends an element $x\in X$ to the singleton subset $\{x\}\subseteq X$. It is given by the transpose of the characteristic function of the diagonal. \TODO{elaborate, natural transformation}
+	\end{definition}
+
+	\TODO{classify mono + epi}
+
+	\TODO{Powersets + subobj classifier imply cartesian closed}
+
+	\TODO{smallest subobject $\emptyset\subseteq X$, largest subobject $X\subseteq X$, arbitrary intersections and unions...}
+
+	\begin{lemma}
+		Let $X$ be a set and $p:I\rightarrow \mathcal{P}(X)$ be a function, regarded as an $I$-indexed family of propositions on $X$.
+
+		Then the sets $\{x\in X\mid \exists i\in I: p_i(x)\}$ and $\{x\in X\mid\forall i\in I: p_i(x)\}$ exist \TODO{UMP}
+	\end{lemma}
+	\begin{proof}
+		Consider the transpose $\widehat p:I\times X\rightarrow \{0,1\}$ of the map $p:I\rightarrow \mathcal{P}(X)$ and note that it suffices to construct the set $\{x\in X\mid \exists i\in I: \widehat p(i,x)=1\}$. This can be realized by first taking the the pullback
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo[ultrawide]
+					{\{(i,x)\in I\times X\mid \widehat p(i,x)=1\}}{\{\ast\}}
+					{I\times X}{\{0,1\}}
+
+				\arrow{nw}{ne}{}
+				\arrow{sw}{se}{}
+				\arrow{nw}{sw}{i}[left]
+				\arrow{ne}{se}{1}[right]
+			\end{diagram}
+		\end{equation*}
+		and then considering the image factorization of the map $\pr_X \circ i$. \TODO{elaborate?}
+
+		Want
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo[ultrawide]
+					{I\times\{x\in X\mid \forall i\in I:p_i(x)\}}{\{\ast\}}
+					{I\times X}{\{0,1\}}
+
+				\arrow{nw}{ne}{}
+				\arrow{sw}{se}{\widehat p}[below]
+				\arrow{nw}{sw}{I\times j}[left]
+				\arrow{ne}{se}{1}[right]
+			\end{diagram}
+		\end{equation*}
+		consider transpose $\widetilde p:X\rightarrow\mathcal{P}(I)$ and pullback
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo[ultrawide]
+					{\{x\in X\mid \widetilde p(x) = \mathbf{1}\}}{\Map(I,\{\ast\})=\{\ast\}}
+					{X}{\Map(I,\{0,1\})}
+
+				\arrow{nw}{ne}{}
+				\arrow{sw}{se}{\widetilde p}[below]
+				\arrow{nw}{sw}{j}[left]
+				\arrow{ne}{se}{\mathbf{1}}[right]
+			\end{diagram}
+		\end{equation*}
+	\end{proof}
+
+	\TODO{$\forall i\in I: p_i(x) \Leftrightarrow \lnot(\exists i\in I: \lnot p_i(x))$...}
+
+	\TODO{rules for interchanging forall and exists}
+
+	\TODO{set of all equivalence relations, set of all partial orders etc...}
+
+	\begin{proposition}
+		Let $X$ be a set and $p:I \rightarrow \mathcal{P}(X)$ be an $I$-indexed family of subsets. Then the set $\{A\subseteq X\mid \forall i\in I: A\subseteq_X p(i)\}$ has a $\subseteq$-maximal element $\bigcap\limits_{i\in I} p(i) \subseteq X$.
+	\end{proposition}
+
+	\begin{proposition}
+		For any set $X$ the powerset $\mathcal{P}(X)$ is a complete lattice.
+	\end{proposition}
+
+	\TODO{Knaster-Tarski (see nlab CSB)}
+
+	\newpage
+	\subsection{Cardinality}
+
+	\begin{definition}
+		Two sets $X$ and $Y$ have the same \textbf{cardinality}, if there exists a bijection $X \cong Y$. This is denoted as $\abs{X} = \abs{Y}$.
+
+		The set $X$ is of \textbf{lesser cardinality} than $Y$, if there exists an injection $X \hookrightarrow Y$. This is denoted as $\abs{X}\leq\abs{Y}$.
+	\end{definition}
+
+	Since every identity function is injective and injections compose, cardinality defines a reflexive and transitive \textit{meta-relation} on the \textit{meta-collection} of isomorphism classes of sets. The rest of this section is devoted to showing that it in fact defines a \textit{meta-theoretical partial order}. More specifically, the following theorem shows that it is an anti-symmetric \textit{meta-relation}.
+
+	\begin{theorem}[Cantor-Schröder-Bernstein]
+		Let $X$ and $Y$ be sets, such that $\abs{X} \leq \abs{Y}$ and $\abs{Y} \leq \abs{X}$. Then $\abs{X}=\abs{Y}$.
+	\end{theorem}
+	\begin{proof}
+		\TODO{see nlab}
+
+		Suppose we have injections $i:X\rightincl Y$ and $j:Y\rightincl X$. We have to construct a bijection $f:X\cong Y$, or equivalently provide $f:X\rightarrow Y$ and its inverse $g:Y\rightarrow X$. Naively we would expect that there is some subset $A\subseteq X$ such that $f\vert_A = i\vert_A$ and that there exists some subset $B \subseteq Y$ such that $g\vert_B = j\vert_B$. In an ideal situation we would have that $B = \lnot_Y i(A)$ and that $A = \lnot_X j(B)$, since then $i$ restricts to an isomorphism $i\vert_A:A\cong i(A)$ and $j$ restricts to an isomorphism $j\vert_B:B\cong j(B)$ and the universal property of the disjoint unions $Y = i(A) + B$ and $X = A + j(B)$ provide us with functions
+		\begin{equation*}
+			\begin{diagram}
+				\threebytwo
+					{A}{X}{j(B)}
+					{}{Y}{B}
+
+				\arrow[]{nw}{n}{\subseteq}[above]
+				\arrow[]{ne}{n}{\supseteq}[above]
+				\arrow{nw}{s}{i\vert_A}[below left]
+				\arrow{ne}{se}{(j\vert_B)^{-1}}[right]
+				\arrow[]{se}{s}{\supseteq}[below]
+				\arrow[dashed]{n}{s}{f}[right]
+			\end{diagram}
+			\hspace{.5cm}\text{and}\hspace{.5cm}
+			\begin{diagram}
+				\threebytwo
+					{i(A)}{Y}{B}
+					{A}{X}{}
+
+				\arrow{nw}{n}{\subseteq}[above]
+				\arrow{ne}{n}{\supseteq}[above]
+				\arrow{nw}{sw}{(i\vert_A)^{-1}}[left]
+				\arrow{sw}{s}{\subseteq}[below]
+				\arrow{ne}{s}{j\vert_B}[below right]
+				\arrow[dashed]{n}{s}{g}[left]
+			\end{diagram}
+		\end{equation*}
+		which are inverse to each other by construction. Note that this ideal situation is equivalent to saying that there is a subset $A\subseteq X$, which satisfies $\lnot_X j(\lnot_X i(A)) = \lnot_X j(B) = A$, or in other words that $A \in \mathcal{P}(X)$ is a fixed point of the order preserving function
+		\begin{equation*}
+			\mathcal{P}(X) \xrightarrow{i[-]} \mathcal{P}(Y) \xrightarrow{\lnot_Y} \mathcal{P}(Y)^\op \xrightarrow{j[-]} \mathcal{P}(X)^\op \xrightarrow{\lnot_X} \mathcal{P}(X).
+		\end{equation*}
+		By the Knaster-Tarski Fixed-Point Theorem \TODO{REF} such a subset $A \subseteq X$ always exists.
+	\end{proof}
+
+	\TODO{would like finite sets}
+
+	\newpage
+	\subsection{The Axioms of Infinity and Countable Choice}
+
+	\TODO{introduce universal recursive object $\mathbb{N}$: natural numbers as smallest nonempty set with infinitely many successors}
+
+	\begin{axiom}[Infinity]
+		There exists a \textbf{set of natural numbers} $\mathbb{N}$ containing an element $0:\{\ast\}\rightarrow \mathbb{N}$ together with a \textbf{successor function} $\succ:\mathbb{N} \rightarrow \mathbb{N}$, which satisfies the following universal property: 
+
+		For every set $X$, element $x_0 \in X$ and endomorphism $f:X\rightarrow X$, there exists a unique function $x:\mathbb{N} \rightarrow \mathbb{N}$ making the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\node (w) at (-1.5,0) {$\{\ast\}$};
+				\node (n) at (0,.75) {$\mathbb{N}$};
+				\node (s) at (0,-.75) {$X$};
+				\node (ne) at (1.5,.75) {$\mathbb{N}$};
+				\node (se) at (1.5,-.75) {$X$};
+
+				\arrow{w}{n}{0}[above left]
+				\arrow{w}{s}{x_0}[below left]
+				\arrow{n}{ne}{\succ}[above]
+				\arrow{s}{se}{f}[below]
+				\arrow[dashed]{n}{s}{x}[right]
+				\arrow[dashed]{ne}{se}{x}[right]
+			\end{diagram}
+		\end{equation*}
+		commute. A function $x:\mathbb{N}\rightarrow X$ is commonly called a \textbf{sequence} in $X$ and for $n\in \mathbb{N}$ one writes $x_n \in X$ instead of $x(n)\in X$.
+	\end{axiom}
+
+	\TODO{discuss Peano}
+
+	\begin{enumerate}[(P1)]
+		\item{	
+			Zero is a natural number.
+		}
+		\item{
+			Every natural number has a unique succesor.
+		}
+		\item{
+			No natural number has zero as its successor.
+		}
+		\item{
+			Distinct natural numbers have different successors.
+		}
+	\end{enumerate}
+
+	\TODO{can do:}
+
+	\begin{lemma}
+		The successor function $\succ: \mathbb{N} \rightarrow \mathbb{N}$ is injective and its image $\succ(\mathbb{N}) \subseteq \mathbb{N}$ decomposes $\mathbb{N}$ into $\mathbb{N} = \{0\} + \succ(\mathbb{N})$. In other words, the diagram
+		\begin{equation*}
+			\{\ast\} \xrightarrow{0} \mathbb{N} \xleftarrow{\succ} \mathbb{N}
+		\end{equation*}
+		is a coproduct diagram and in particular provides an isomorphism $\mathbb{N} \cong \{\ast\}+\mathbb{N}$.
+	\end{lemma}
+	\begin{proof}
+		\TODO{Johnstone}
+
+		We show that the set $\{\ast\}+\mathbb{N}$ satisfies the universal property of the natural numbers. To this end consider the diagram
+		\begin{equation*}
+			\begin{array}{ccccc}
+			\{\ast\} &\xrightarrow{\incl_1} &\{\ast\} + \mathbb{N} &\xrightarrow{\incl_2 \circ [0,\succ]} &\{\ast\} + \mathbb{N}\\
+			\ast & \longmapsto & \ast & \longmapsto & 0\\
+			&&n & \longmapsto & \succ(n)
+			\end{array}
+		\end{equation*}
+		and an arbitrary diagram
+		\begin{equation*}
+			\{\ast\} \xrightarrow{x_0} X \xrightarrow{f} X
+		\end{equation*}
+		With $y: \mathbb{N} \rightarrow X$ being the function induced by the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\node (w) at (-1.5,0) {$\{\ast\}$};
+				\node (n) at (0,.75) {$\mathbb{N}$};
+				\node (s) at (0,-.75) {$X$};
+				\node (ne) at (1.5,.75) {$\mathbb{N}$};
+				\node (se) at (1.5,-.75) {$X$};
+
+				\arrow{w}{n}{0}[above left]
+				\arrow{w}{s}{f(x_0)}[below left]
+				\arrow{n}{ne}{\succ}[above]
+				\arrow{s}{se}{f}[below]
+				\arrow[dashed]{n}{s}{y}[right]
+				\arrow[dashed]{ne}{se}{y}[right]
+			\end{diagram}
+		\end{equation*}
+		we obtain a commutative diagram
+		\begin{equation*}
+			\begin{diagram}
+				\node (w) at (-2.5,0) {$\{\ast\}$};
+				\node (n) at (0,.75) {$\{\ast\} + \mathbb{N}$};
+				\node (s) at (0,-.75) {$X$};
+				\node (ne) at (3.5,.75) {$\{\ast\} + \mathbb{N}$};
+				\node (se) at (3.5,-.75) {$X$};
+
+				\arrow{w}{n}{\incl_1}[above]
+				\arrow{w}{s}{x_0}[below left]
+				\arrow{n}{ne}{\incl_2 \circ [0,\succ]}[above]
+				\arrow{s}{se}{f}[below]
+				\arrow[]{n}{s}{[x_0,y]}[right]
+				\arrow[]{ne}{se}{[x_0,y]}[right]
+			\end{diagram}
+		\end{equation*}
+		Conversely, if $[x_0,y']:\{\ast\} + \mathbb{N} \rightarrow X$ is an arbitrary map making the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\node (w) at (-2.5,0) {$\{\ast\}$};
+				\node (n) at (0,.75) {$\{\ast\} + \mathbb{N}$};
+				\node (s) at (0,-.75) {$X$};
+				\node (ne) at (3.5,.75) {$\{\ast\} + \mathbb{N}$};
+				\node (se) at (3.5,-.75) {$X$};
+
+				\arrow{w}{n}{\incl_1}[above]
+				\arrow{w}{s}{x_0}[below left]
+				\arrow{n}{ne}{\incl_2 \circ [0,\succ]}[above]
+				\arrow{s}{se}{f}[below]
+				\arrow[]{n}{s}{[x_0,y']}[right]
+				\arrow[]{ne}{se}{[x_0,y']}[right]
+			\end{diagram}
+		\end{equation*}
+		commute, then the diagrams
+		\begin{equation*}
+			\begin{diagram}
+				\twobythree[ultrawide]
+					{\mathbb{N}}{\mathbb{N}}
+					{\{\ast\}+\mathbb{N}}{\{\ast\}+\mathbb{N}}
+					{X}{X}
+
+				\arrow{nw}{ne}{\succ}[above]
+				\arrow{sw}{se}{f}[below]
+				\arrow{w}{ne}{[0,\succ]}[ontop]
+
+				\arrow[out=-135,in=135]{nw}{sw}{y'}[left]
+				\arrow{nw}{w}{\incl_2}[right]
+				\arrow{w}{sw}{[x,y']}[right]
+
+				\arrow[out=-45,in=45]{ne}{se}{y'}[right]
+				\arrow{ne}{e}{\incl_2}[left]
+				\arrow{e}{se}{[x,y']}[left]
+			\end{diagram}
+			\hspace{.5cm}\text{and}\hspace{.5cm}
+			\begin{diagram}
+				\threebytwo[wide]
+					{\{\ast\}}{\{\ast\}+\mathbb{N}}{\mathbb{N}}
+					{}{X}{X}
+
+				\arrow[bend left]{nw}{ne}{0}[above]
+				\arrow{nw}{n}{\incl_1}[below]
+				\arrow{n}{ne}{[0,\succ]}[below]
+
+				\arrow{nw}{s}{x}[below left]
+				\arrow{s}{se}{f}[below]
+
+				\arrow{n}{s}{[x,y']}[right]
+				\arrow{ne}{se}{y'}[right]
+			\end{diagram}
+		\end{equation*}
+		commute. Hence the function $y'$ satisfies the same universal property as the function $y$, showing that $y$ and $y'$ agree.
+
+		Specializing this discussion to the diagram
+		\begin{equation*}
+			\{\ast\} \xrightarrow{0} \mathbb{N} \xrightarrow{\succ} \mathbb{N}
+		\end{equation*}
+		we arrive at the desired isomorphism
+		\begin{equation*}
+			\begin{diagram}
+				\node (w) at (-2.5,0) {$\{\ast\}$};
+				\node (n) at (0,.75) {$\{\ast\} + \mathbb{N}$};
+				\node (s) at (0,-.75) {$\mathbb{N}$};
+				\node (ne) at (3.5,.75) {$\{\ast\} + \mathbb{N}$};
+				\node (se) at (3.5,-.75) {$\mathbb{N}$};
+
+				\arrow{w}{n}{\incl_1}[above]
+				\arrow{w}{s}{0}[below left]
+				\arrow{n}{ne}{\incl_2 \circ [0,\succ]}[above]
+				\arrow{s}{se}{\succ}[below]
+				\arrow[]{n}{s}{\;\;\;\;\;\;\;\;\;\cong\;\;[0,\succ]}[]
+				\arrow[]{ne}{se}{\;\;\;\;\;\;\;\;\;\cong\;\;[0,\succ]}[]
+			\end{diagram}
+		\end{equation*}
+		since the diagram
+		\begin{equation*}
+			\begin{diagram}
+				\node (w) at (-1.5,0) {$\{\ast\}$};
+				\node (n) at (0,.75) {$\mathbb{N}$};
+				\node (s) at (0,-.75) {$\mathbb{N}$};
+				\node (ne) at (1.5,.75) {$\mathbb{N}$};
+				\node (se) at (1.5,-.75) {$\mathbb{N}$};
+
+				\arrow{w}{n}{0}[above left]
+				\arrow{w}{s}{\succ(0)}[below left]
+				\arrow{n}{ne}{\succ}[above]
+				\arrow{s}{se}{\succ}[below]
+				\arrow[]{n}{s}{\succ}[right]
+				\arrow[]{ne}{se}{\succ}[right]
+			\end{diagram}
+		\end{equation*}
+		commutes.
+	\end{proof}
+
+	\TODO{have shown that $\succ$ is injective and that zero is not the successor of any natural number! missing Peano-axiom: no loops!}
+
+	\begin{enumerate}
+		\item[(P5)]{
+			If a statement holds for zero and if the statement for a natural number implies the statement for its successor, then it holds for all natural numbers.
+		}
+	\end{enumerate}
+
+	\begin{lemma}[Peano's Fifth Postulate]
+		Any subset $A\subseteq \mathbb{N}$, which contains $0 \in X$ and is \textit{closed under successors} in the sense that $\succ(A) \subseteq_\mathbb{N} A$ is the whole of $\mathbb{N}$.
+	\end{lemma}
+	\begin{proof}
+		\TODO{adapt (simplify???) Johnstone Thm. 6.14}
+	\end{proof}
+
+	\TODO{construct arithmetic, refer to later sections for rules, motivate transpose by wanting to construct map out of $\bbN$}
+
+	For an element $n\in \mathbb{N}$, want function $\ell_n:\mathbb{N} \rightarrow \mathbb{N}, m \mapsto n+m$ and want that $0 + m = m$ and $(\succ n) + m = \succ (n+m)$.
+
+	\begin{definition}
+		The natural numbers admit an \textbf{addition} function $+:\mathbb{N}\times \mathbb{N} \rightarrow \mathbb{N}$, whose transpose $L_\bullet:\mathbb{N} \rightarrow \Map(\mathbb{N},\mathbb{N})$ is the unique function induced from the requirement that
+		\begin{equation*}
+			\begin{diagram}
+				\node (w) at (-2.5,0) {$\{\ast\}$};
+				\node (n) at (0,.75) {$\mathbb{N}$};
+				\node (s) at (0,-.75) {$\Map(\mathbb{N},\mathbb{N})$};
+				\node (ne) at (3,.75) {$\mathbb{N}$};
+				\node (se) at (3,-.75) {$\Map(\mathbb{N},\mathbb{N})$};
+
+				\arrow{w}{n}{0}[above left]
+				\arrow{w}{s}{\id_\mathbb{N}}[below]
+				\arrow{n}{ne}{\succ}[above]
+				\arrow{s}{se}{\succ_\ast}[below]
+				\arrow[dashed]{n}{s}{\ell_\bullet}[right]
+				\arrow[dashed]{ne}{se}{\ell_\bullet}[right]
+			\end{diagram}
+		\end{equation*}
+		commutes.
+	\end{definition}
+
+	\TODO{construct standard order on $\mathbb{N}$}
+
+	\begin{lemma}
+		The function $\leq:\mathbb{N}\times\mathbb{N} \xrightarrow{(\pr_1,+)} \mathbb{N}\times\mathbb{N}$ is injective and defines a \TODO{total} order on $\mathbb{N}$, called the \textbf{standard order}.
+	\end{lemma}
+	\begin{proof}
+		\TODO{cf. Johnstone Prop. 6.17}
+	\end{proof}
+
+	\TODO{$\mathbb N$ wellordered?}
+
+	\begin{axiom}[Countable Choice]
+		Every surjective function $f:X \rightarrow \mathbb{N}$ admits a section $s:\mathbb{N} \rightarrow X$ satisfying $fs = \id_\mathbb{N}$.
+	\end{axiom}
+	\begin{lemma}
+		\TODO{as exercise?}
+		The axiom of countable choice is equivalent to the requirement that every lifting problem of the form
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{}{X}
+					{\mathbb{N}}{Y}
+
+				\arrow[epi]{ne}{se}{p}[right]
+				\arrow{sw}{se}{f}[below]
+				\arrow[dashed]{sw}{ne}{s}[above left]
+			\end{diagram}
+		\end{equation*}
+		in which $p$ is a surjection admits a solution.
+	\end{lemma}
+	\begin{proof}
+		The existence of lifts for all lifting problems implies the axiom of countable choice by choosing $f = \id_\mathbb{N}$. Conversely consider an arbitrary lifting problem as depicted above and form the pullback
+		\begin{equation*}
+			\begin{diagram}
+				\twobytwo
+					{P}{X}
+					{\mathbb{N}}{Y}
+
+				\arrow{nw}{ne}{f'}[above]
+				\arrow{sw}{se}{f}[below]
+				\arrow[epi]{nw}{sw}{p'}[right]
+				\arrow[epi]{ne}{se}{p}[right]
+
+				\arrow[gray,out=135,in=-135]{sw}{nw}{s'}[left]
+			\end{diagram}
+		\end{equation*}
+		Since by \TODO{REF} a pullback of a surjection is a surjection, the function $q$ is surjective, hence by the axiom of countable choice admits a section $s':\mathbb{N} \rightarrow P$. But then $s = f' \circ s'$ defines a lift as required.
+	\end{proof}
+
+	\newpage
+	\subsection{Finiteness}
+
+	\begin{lemma}[MO410013]
+		The following assertions are equivalent
+		\begin{enumerate}
+			\item{
+				There exists $n\in \mathbb{N}$ such that $X \cong [n]$.
+			}
+			\item{
+				The set $X$ is isomorphic to a subset $E\subseteq X$ and $X$ is \underline{not} isomorphic to $\mathbb{N}$.
+			}
+			\item{
+				Every nonempty subset of $\mathcal{P}(X)$ has a maximal element. (Tarski)
+			}
+			\item{
+				Every nonempty subset of $\mathcal{P}(X)$ has a minimal element (Tarksi)
+			}
+		\end{enumerate}
+	\end{lemma}
+
+	\begin{lemma}[MO410013]
+		The following assertions are equivalent.
+		\begin{enumerate}
+			\item{
+				There is \underline{no} surjection $X \rightarrow \mathbb{N}$.
+			}
+			\item{
+				The set $X$ is Noetherian.
+			}
+			\item{
+				The set $X$ is Artinian.
+			}
+		\end{enumerate}
+	\end{lemma}
+
+	\begin{lemma}[MO410013]
+		The following assertions are equivalent.
+		\begin{enumerate}
+			\item{
+				Every injective endomorphism $X\rightarrow X$ is a bijection.
+			}
+			\item{
+				There is \underline{no} injection $\mathbb{N} \rightarrow X$.
+			}
+		\end{enumerate}
+	\end{lemma}
+
+	\begin{definition}
+		A set $X$ is \textbf{finite}, if it is either the empty set or isomorphic to $Y + \{\ast\}$ for a finite set $Y$.
+	\end{definition}
+
+	\begin{definition}
+		The set of \textbf{Kuratowski-finite subsets} of a set $X$ is defined as the smallest subset of $\mathcal{P}_\fin(X)\subseteq\mathcal{P}(X)$, which contains the empty subset $\emptyset\subseteq X$ and each singleton subset $\{x\} \subseteq X$ for $x\in X$ and which is closed under binary unions. \TODO{explicit construction: smallest sub-$\lor$-lattice}
+
+		A subset $K\subseteq X$ is \textbf{Kuratowski-finite}, if $K \in \mathcal{P}_\fin(X)$. A set $X$ is \textbf{Kuratowski-finite}, if $X \in \mathcal{P}_\fin(X)$.
+	\end{definition}
+
+	\begin{definition}
+		A set $X$ is \textbf{Kuratowski-finite}, if \TODO{no NNO! see Ortega}
+	\end{definition}
+
+	\begin{definition}
+		A set $X$ is \textbf{Dedekind-finite}, if every injective endomorphism $X\rightarrow X$ is bijective.
+	\end{definition}
+
+	\begin{definition}
+		A set $X$ is \textbf{Tarski-finite}, if every inhabited subobject of $\mathcal{P}(X)$ has a $\subseteq$-minimal element.
+	\end{definition}
+
+	\begin{definition}
+		A set $X$ is \textbf{Artin-finite}, if every descending sequence of subsets
+		\begin{equation*}
+			A_1 \supseteq_X A_2 \supseteq_X A_3 \supseteq_X ...
+		\end{equation*}
+		stabilizes.
+	\end{definition}
+
+	\begin{theorem}
+		For a set $X$ the following assertions are equivalent.
+		\begin{enumerate}[(i)]
+			\item{
+				The set $X$ is finite.
+			}
+			\item{
+				The set $X$ is Kuratowski-finite.
+			}
+			\item{
+				The set $X$ is Dedekind-finite.
+			}
+			\item{
+				The set $X$ is Tarski-finite.
+			}
+		\end{enumerate}
+	\end{theorem}
+	\begin{proof}
+		\begin{enumerate}
+			\item[(i)$\Rightarrow$(iii)]{
+				The empty set is Dedekind-finite. Thus let $X$ be isomorphic to some set $Y + \{\ast\}$, for which we assume that $Y$ is finite and Dedekind-finite. Consider an injective endomorphism $X\rightarrow X$. It gives rise to an injective endomorphism $f:Y+\{\ast\} \rightarrow Y+\{\ast\}$. \TODO{???}
+			}
+		\end{enumerate}
+
+		Suppose $X$ is Kuratowski-finite. Let $x\in X$ and consider $X'=X\setminus\{x\}$.
+	\end{proof}
+
+	\TODO{finite AC}
+
+	\TODO{pigeon-hole principle}
+
+	\TODO{remark that up until now finite sets are valid set theory}
+
+	\newpage
+
+	\subsection{Cantor Diagonalization and the Continuum}
+	\subsection{The Axiom of Choice and Zorn's Lemma}
+
+
+	\newpage
+	\section{Elementary Number Theory and Elementary Geometry}
+	\subsection{The Natural Numbers}
+
+	\TODO{arithmetic and order of natural numbers, prime numbers, initial monoid}
+
+	\subsection{The Integers}
+
+	\TODO{arithmetic, initial abelian group}
+
+	\subsection{Modular Arithmetic?}
+
+	\TODO{modular arithmetic}
+
+	\subsection{The Rational Numbers}
+	\subsection{The Real Numbers}
+	\subsection{The Euclidean Plane}
+	\subsection{The Complex Numbers}
+
+	\TODO{complex numbers, algebraically closed, complex exponential function}
+
+	\subsection{The $p$-adic Numbers?}
+
+
+	\newpage
+	\section{Category Theory}
+	\subsection{Categories, Functors, Natural Transformations}
+	\subsection{Limits and Colimits}
+	\subsection{Adjoint Functors}
+	\subsection{Monoidal Structures?}
+
+	\newpage
+	\section{Independence Results}
+	\subsection{Sheaf Theoretic Forcing}
+	\subsection{Forcing $\mathsf{CH}$}
+	\subsection{Forcing $\lnot\mathsf{CH}$}
+	\subsection{Forcing $\lnot \mathsf{C}$}
+\end{document}

@@ -1,0 +1,2006 @@
+% --- begin package declaration
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{diagrams}
+
+\RequirePackage{xparse} % better command definition
+\RequirePackage{xstring} % strings
+\RequirePackage{tikz}
+	\usetikzlibrary{matrix} % node placement
+	\usetikzlibrary{calc} % calculation
+	\usetikzlibrary{decorations.pathmorphing} %snaked
+	\usetikzlibrary{arrows} % right hook->
+	\usetikzlibrary{arrows.meta} % -Implies
+
+\RequirePackage{etoolbox} % turn off math ligatures in equations
+	\AtBeginDocument{
+		\@ifpackageloaded{semantic}{
+			\BeforeBeginEnvironment{equation}{\mathligsoff}
+			\AfterEndEnvironment{equation}{\mathligson}
+			\BeforeBeginEnvironment{equation*}{\mathligsoff}
+			\AfterEndEnvironment{equation*}{\mathligson}
+		}{
+			%\newcommand{\mathligson}{}
+			%\newcommand{\mathligsoff}{}
+		}
+	}
+
+
+% --- tikz styles and commands
+\tikzset{diagram/.append style={
+	baseline={($(current bounding box.center) + (0pt,-0.15\baselineskip)$)}
+}}
+
+\tikzset{objects/.append style={
+	matrix of nodes,
+	ampersand replacement=\&, % replaces the column indicator from & to \&
+	text height=1.75ex, text depth=0.5ex, % fixes some text alignment issues with nodes
+	column sep={5em,between origins}, row sep={4.5em,between origins} % width of node does not influence column spacing
+}}
+
+
+\tikzset{small/.append style={
+	column sep={4em,between origins},
+	row sep={3.5em,between origins}
+}}
+\tikzset{narrow/.append style={
+	column sep={4em,between origins}
+}}
+\tikzset{low/.append style={
+	row sep={3.5em,between origins}
+}}
+
+
+\tikzset{large/.append style={
+	column sep={6em,between origins},
+	row sep={5.5em,between origins}
+}}
+\tikzset{wide/.append style={
+	column sep={6em,between origins}
+}}
+\tikzset{high/.append style={
+	row sep={5.5em,between origins}
+}}
+
+\tikzset{verylarge/.append style={
+	column sep={8em,between origins},
+	row sep={7.5em,between origins}
+}}
+\tikzset{verywide/.append style={
+	column sep={8em,between origins}
+}}
+\tikzset{veryhigh/.append style={
+	row sep={7.5em,between origins}
+}}
+
+\tikzset{ultralarge/.append style={
+	column sep={10em,between origins},
+	row sep={9.5em,between origins}
+}}
+\tikzset{ultrawide/.append style={
+	column sep={10em,between origins}
+}}
+\tikzset{ultrahigh/.append style={
+	row sep={9.5em,between origins}
+}}
+
+\tikzset{hyperlarge/.append style={
+	column sep={13em,between origins},
+	row sep={12.5em,between origins}
+}}
+\tikzset{hyperwide/.append style={
+	column sep={13em,between origins}
+}}
+\tikzset{hyperhigh/.append style={
+	row sep={12.5em,between origins}
+}}
+
+\tikzset{megalarge/.append style={
+	column sep={16em,between origins},
+	row sep={15.5em,between origins}
+}}
+\tikzset{megawide/.append style={
+	column sep={16em,between origins}
+}}
+\tikzset{megahigh/.append style={
+	row sep={15.5em,between origins}
+}}
+
+
+
+\tikzset{equals/.append style={
+	-,
+	double,
+	double distance=0.2em
+}}
+
+\tikzset{incl/.append style={right hook->}}
+\tikzset{epi/.append style={->>}}
+\tikzset{mono/.append style={>->}}
+\tikzset{mapsto/.append style={|->}}
+%\tikzset{iso/.append style={
+%	%TODO
+%}}
+\tikzset{implies/.append style={
+	arrows={-Implies},
+	double,
+	double distance=0.2em
+}}
+
+%TODO fix epi mono, epi incl ???
+%TODO add styles for vertical spacing (parallel arrows)
+%TODO add styles and commands for nodes
+%TODO hook arrows
+
+\tikzset{snaked/.append style={
+	decoration={
+		snake,
+		amplitude=.4mm,
+		segment length=2mm,
+		pre length=1mm,
+		post length=1mm
+	}
+}}
+\tikzset{zigzaged/.append style={
+	decoration={
+		zigzag,
+		amplitude=.4mm,
+		segment length=2mm,
+		pre length=1mm,
+		post length=1mm
+	}
+}}
+\tikzset{higher/.append style={
+	transform canvas={
+		yshift=+.3ex
+	}
+}}
+\tikzset{lower/.append style={
+	transform canvas={
+		yshift=-.3ex
+	}
+}}
+\tikzset{righter/.append style={
+	transform canvas={
+		xshift=+.3ex
+	}
+}}
+\tikzset{lefter/.append style={
+	transform canvas={
+		xshift=-.3ex
+	}
+}}
+\tikzset{ontop/.append style={
+	fill=white
+}}
+
+\NewDocumentEnvironment{diagram}{}{
+	\tikzpicture[diagram]
+}{
+	\endtikzpicture
+}
+
+% \NewDocumentCommand{\edge}{ommm}{
+% 	\IfNoValueTF{#1}{
+% 		\draw (#2) edge node[font=\footnotesize]{\ensuremath{#4}} (#3);
+% 	}{
+% 		\draw[#1] (#2) edge[#1] node[font=\footnotesize]{\ensuremath{#4}} (#3); %TODO difference between -- and edge?
+% 	}
+% }
+
+\NewDocumentCommand{\edge}{ommmo}{
+	\IfNoValueTF{#1}{
+		\IfNoValueTF{#5}{
+			\draw (#2) edge[decorate] node[font=\footnotesize] {\ensuremath{#4}} (#3);
+		}{
+			\draw (#2) edge[decorate] node[#5,font=\footnotesize] {\ensuremath{#4}} (#3);
+		}
+	}{
+		\IfNoValueTF{#5}{
+			\draw[#1] (#2) edge[decorate,#1] node[font=\footnotesize] {\ensuremath{#4}} (#3);
+		}{
+			\draw[#1] (#2) edge[decorate,#1] node[#5,font=\footnotesize] {\ensuremath{#4}} (#3);
+		}
+	}
+}
+
+\NewDocumentCommand{\arrow}{ommmo}{
+	\IfNoValueTF{#1}{
+		\IfNoValueTF{#5}{
+			\path[->] (#2) edge[decorate] node[font=\footnotesize] {\ensuremath{#4}} (#3);
+		}{
+			\path[->] (#2) edge[decorate] node[#5,font=\footnotesize] {\ensuremath{#4}} (#3);
+		}
+	}{
+		\IfNoValueTF{#5}{
+			\path[->,#1] (#2) edge[decorate,#1] node[font=\footnotesize] {\ensuremath{#4}} (#3);
+		}{
+			\path[->,#1] (#2) edge[decorate,#1] node[#5,font=\footnotesize] {\ensuremath{#4}} (#3);
+		}
+	}
+}
+
+\NewDocumentCommand{\name}{mmo}{
+	\IfNoValueTF{#3}{
+		\node at (#1) {\ensuremath{#2}};
+	}{
+		\node[#3] at (#1) {\ensuremath{#2}};
+	}
+}
+
+
+% --- braid diagrams
+
+\NewDocumentCommand{\knot}{mmmm}{
+	\node[font=\footnotesize] (#1#2#3) at (barycentric cs:#1=1,#2=1,#3=2) {\ensuremath{#4}}; 
+	\draw (#1) -- (#1#2#3); 
+	\draw (#2) -- (#1#2#3); 
+	\draw (#1#2#3) -- (#3);
+}
+
+\NewDocumentCommand{\unknot}{mmmm}{
+	\node[font=\footnotesize] (#1#2#3) at (barycentric cs:#1=2,#2=1,#3=1) {\ensuremath{#4}}; 
+	\draw (#1) -- (#1#2#3); 
+	\draw (#1#2#3) -- (#2); 
+	\draw (#1#2#3) -- (#3);
+}
+
+\NewDocumentCommand{\bbox}{m}{
+	\node[draw,fit=#1,inner ysep=0pt] {};
+}
+
+% \NewDocumentCommand{\merge}{mmmm}{
+% 	\node (#1#2#3) at ($(.5(#1).x+.5(#2).x,.5(#1).y+.5(#2).y)$) {\ensuremath{#4}}; \draw (#1) -- (#1#2#3); \draw (#2) -- (#1#2#3); \draw (#1#2#3) -- (#3);
+% }
+
+
+% --- common diagram shapes
+
+% A B
+\NewDocumentCommand{\twobyone}{omomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (w) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (e) {\ensuremath{\tempb}};\\
+	};
+}
+
+% A B C
+\NewDocumentCommand{\threebyone}{omomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (w) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (c) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (e) {\ensuremath{\tempc}};\\
+	};
+}
+
+% A B C D
+\NewDocumentCommand{\fourbyone}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (ww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (w) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (e) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (ee) {\ensuremath{\tempd}};\\
+	};
+}
+
+% A B C D E
+\makeatletter
+\NewDocumentCommand{\fivebyone}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@fivebyonecont
+}
+\NewDocumentCommand{\@fivebyonecont}{mo}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (ww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (w) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (c) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (e) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (ee) {\ensuremath{\tempe}};\\
+	};
+}
+\makeatother
+
+
+
+% A B
+\NewDocumentCommand{\onebytwo}{omomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (n) {\ensuremath{\tempa}};\\
+		\node[\tempbopt] (s) {\ensuremath{\tempb}};\\
+	};
+}
+
+% A B C
+\NewDocumentCommand{\onebythree}{omomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (n) {\ensuremath{\tempa}};\\
+		\node[\tempbopt] (c) {\ensuremath{\tempb}};\\
+		\node[\tempcopt] (s) {\ensuremath{\tempc}};\\
+	};
+}
+
+% A B C D
+\NewDocumentCommand{\onebyfour}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nn) {\ensuremath{\tempa}};\\
+		\node[\tempbopt] (n) {\ensuremath{\tempb}};\\
+		\node[\tempcopt] (s) {\ensuremath{\tempc}};\\
+		\node[\tempdopt] (ss) {\ensuremath{\tempd}};\\
+	};
+}
+
+% A B C D E
+\makeatletter
+\NewDocumentCommand{\onebyfive}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@onebyfivecont
+}
+\NewDocumentCommand{\@onebyfivecont}{mo}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nn) {\ensuremath{\tempa}};\\
+		\node[\tempbopt] (n) {\ensuremath{\tempb}};\\
+		\node[\tempcopt] (c) {\ensuremath{\tempc}};\\
+		\node[\tempdopt] (s) {\ensuremath{\tempd}};\\
+		\node[\tempeopt] (ss) {\ensuremath{\tempe}};\\
+	};
+}
+\makeatother
+
+
+
+% A B
+% C D
+\makeatletter
+\NewDocumentCommand{\twobytwo}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nw) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (ne) {\ensuremath{\tempb}};\\
+		\node[\tempcopt] (sw) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (se) {\ensuremath{\tempd}};\\
+	};
+}
+\makeatother
+
+% A B C
+% D E F
+\makeatletter
+\NewDocumentCommand{\threebytwo}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@threebytwocont
+}
+\NewDocumentCommand{\@threebytwocont}{momo}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nw) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (n) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (ne) {\ensuremath{\tempc}};\\
+		\node[\tempdopt] (sw) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (s) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (se) {\ensuremath{\tempf}};\\
+	};
+}
+\makeatother
+
+% A B
+% C D
+% E F
+\makeatletter
+\NewDocumentCommand{\twobythree}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@twobythreecont
+}
+\NewDocumentCommand{\@twobythreecont}{momo}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nw) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (ne) {\ensuremath{\tempb}};\\
+		\node[\tempcopt] (w) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (e) {\ensuremath{\tempd}};\\
+		\node[\tempeopt] (sw) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (se) {\ensuremath{\tempf}};\\
+	};
+}
+\makeatother
+
+% A B C D
+% E F G H
+\makeatletter
+\NewDocumentCommand{\fourbytwo}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@fourbytwocont
+}
+\NewDocumentCommand{\@fourbytwocont}{momomomo}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nw) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (ne) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (nee) {\ensuremath{\tempd}};\\
+		\node[\tempeopt] (sww) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (sw) {\ensuremath{\tempf}};\&
+		\node[\tempgopt] (se) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (see) {\ensuremath{\temph}};\\
+	};
+}
+\makeatother
+
+
+
+% A B
+% C D
+% E F
+% G H
+\makeatletter
+\NewDocumentCommand{\twobyfour}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@twobyfourcont
+}
+\NewDocumentCommand{\@twobyfourcont}{momomomo}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nnw) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nne) {\ensuremath{\tempb}};\\
+		\node[\tempcopt] (nw) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (ne) {\ensuremath{\tempd}};\\
+		\node[\tempeopt] (sw) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (se) {\ensuremath{\tempf}};\\
+		\node[\tempgopt] (ssw) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (sse) {\ensuremath{\temph}};\\
+	};
+}
+\makeatother
+
+% A B C D E
+% F G H I J
+\makeatletter
+\NewDocumentCommand{\fivebytwo}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@fivebytwocont
+}
+\NewDocumentCommand{\@fivebytwocont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@fivebytwocontcont
+}
+\NewDocumentCommand{\@fivebytwocontcont}{omo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nw) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (n) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (ne) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (nee) {\ensuremath{\tempe}};\\
+		\node[\tempfopt] (sww) {\ensuremath{\tempf}};\&
+		\node[\tempgopt] (sw) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (s) {\ensuremath{\temph}};\&
+		\node[\tempiopt] (se) {\ensuremath{\tempi}};\&
+		\node[\tempjopt] (see) {\ensuremath{\tempj}};\\
+	};
+}
+\makeatother
+
+
+% A B C D E F
+% G H I J K L
+\makeatletter
+\NewDocumentCommand{\sixbytwo}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@sixbytwocont
+}
+\NewDocumentCommand{\@sixbytwocont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@sixbytwocontcont
+}
+\NewDocumentCommand{\@sixbytwocontcont}{omomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nwww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nww) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (nw) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (ne) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (nee) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (neee) {\ensuremath{\tempf}};\\
+		\node[\tempgopt] (swww) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (sww) {\ensuremath{\temph}};\&
+		\node[\tempiopt] (sw) {\ensuremath{\tempi}};\&
+		\node[\tempjopt] (se) {\ensuremath{\tempj}};\&
+		\node[\tempkopt] (see) {\ensuremath{\tempk}};\&
+		\node[\templopt] (seee) {\ensuremath{\templ}};\\
+	};
+}
+\makeatother
+
+% A B C
+% D E F
+% G H I
+\makeatletter
+\NewDocumentCommand{\threebythree}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@threebythreecont
+}
+\NewDocumentCommand{\@threebythreecont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@threebythreecontcont
+}
+\NewDocumentCommand{\@threebythreecontcont}{o}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nw) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (n) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (ne) {\ensuremath{\tempc}};\\
+		\node[\tempdopt] (w) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (c) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (e) {\ensuremath{\tempf}};\\
+		\node[\tempgopt] (sw) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (s) {\ensuremath{\temph}};\&
+		\node[\tempiopt] (se) {\ensuremath{\tempi}};\\
+	};
+}
+\makeatother
+
+% A B C D
+% E F G H
+% I J K L
+\makeatletter
+\NewDocumentCommand{\fourbythree}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@fourbythreecont
+}
+\NewDocumentCommand{\@fourbythreecont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@fourbythreecontcont
+}
+\NewDocumentCommand{\@fourbythreecontcont}{omomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nw) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (ne) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (nee) {\ensuremath{\tempd}};\\
+		\node[\tempeopt] (ww) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (w) {\ensuremath{\tempf}};\&
+		\node[\tempgopt] (e) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (ee) {\ensuremath{\temph}};\\
+		\node[\tempiopt] (sww) {\ensuremath{\tempi}};\&
+		\node[\tempjopt] (sw) {\ensuremath{\tempj}};\&
+		\node[\tempkopt] (se) {\ensuremath{\tempk}};\&
+		\node[\templopt] (see) {\ensuremath{\templ}};\\
+	};
+}
+\makeatother
+
+% A B C
+% D E F
+% G H I
+% J K L
+\makeatletter
+\NewDocumentCommand{\threebyfour}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@threebyfourcont
+}
+\NewDocumentCommand{\@threebyfourcont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@threebyfourcontcont
+}
+\NewDocumentCommand{\@threebyfourcontcont}{omomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nnw) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nn) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (nne) {\ensuremath{\tempc}};\\
+		\node[\tempdopt] (nw) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (n) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (ne) {\ensuremath{\tempf}};\\
+		\node[\tempgopt] (sw) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (s) {\ensuremath{\temph}};\&
+		\node[\tempiopt] (se) {\ensuremath{\tempi}};\\
+		\node[\tempjopt] (ssw) {\ensuremath{\tempj}};\&
+		\node[\tempkopt] (ss) {\ensuremath{\tempk}};\&
+		\node[\templopt] (sse) {\ensuremath{\templ}};\\
+	};
+}
+\makeatother
+
+% A B C D
+% E F G H
+% I J K L
+% M N O P
+\makeatletter
+\NewDocumentCommand{\fourbyfour}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@fourbyfourcont
+}
+\NewDocumentCommand{\@fourbyfourcont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@fourbyfourcontcont
+}
+\NewDocumentCommand{\@fourbyfourcontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}
+	\@fourbyfourcontcontcont
+}
+
+\NewDocumentCommand{\@fourbyfourcontcontcont}{momomo}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nnww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nnw) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (nne) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (nnee) {\ensuremath{\tempd}};\\
+		\node[\tempeopt] (nww) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (nw) {\ensuremath{\tempf}};\&
+		\node[\tempgopt] (ne) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (nee) {\ensuremath{\temph}};\\
+		\node[\tempiopt] (sww) {\ensuremath{\tempi}};\&
+		\node[\tempjopt] (sw) {\ensuremath{\tempj}};\&
+		\node[\tempkopt] (se) {\ensuremath{\tempk}};\&
+		\node[\templopt] (see) {\ensuremath{\templ}};\\
+		\node[\tempmopt] (ssww) {\ensuremath{\tempm}};\&
+		\node[\tempnopt] (ssw) {\ensuremath{\tempn}};\&
+		\node[\tempoopt] (sse) {\ensuremath{\tempo}};\&
+		\node[\temppopt] (ssee) {\ensuremath{\tempp}};\\
+	};
+}
+\makeatother
+
+
+% A B C D
+% E F G H
+% I J K L
+% M N O P
+% Q R S T
+\makeatletter
+\NewDocumentCommand{\fourbyfive}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@fourbyfivecont
+}
+\NewDocumentCommand{\@fourbyfivecont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@fourbyfivecontcont
+}
+\NewDocumentCommand{\@fourbyfivecontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}
+	\@fourbyfivecontcontcont
+}
+\NewDocumentCommand{\@fourbyfivecontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}
+	\@fourbyfivecontcontcontcont
+}
+\NewDocumentCommand{\@fourbyfivecontcontcontcont}{omomo}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}
+	\def\temps{\IfNoValueTF{#2}{}{#2}}
+	\def\tempsopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempt{\IfNoValueTF{#4}{}{#4}}
+	\def\temptopt{\IfNoValueTF{#5}{}{#5}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nnww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nnw) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (nne) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (nnee) {\ensuremath{\tempd}};\\
+		\node[\tempeopt] (nww) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (nw) {\ensuremath{\tempf}};\&
+		\node[\tempgopt] (ne) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (nee) {\ensuremath{\temph}};\\
+		\node[\tempiopt] (ww) {\ensuremath{\tempi}};\&
+		\node[\tempjopt] (w) {\ensuremath{\tempj}};\&
+		\node[\tempkopt] (e) {\ensuremath{\tempk}};\&
+		\node[\templopt] (ee) {\ensuremath{\templ}};\\
+		\node[\tempmopt] (sww) {\ensuremath{\tempm}};\&
+		\node[\tempnopt] (sw) {\ensuremath{\tempn}};\&
+		\node[\tempoopt] (se) {\ensuremath{\tempo}};\&
+		\node[\temppopt] (see) {\ensuremath{\tempp}};\\
+		\node[\tempqopt] (ssww) {\ensuremath{\tempq}};\&
+		\node[\tempropt] (ssw) {\ensuremath{\tempr}};\&
+		\node[\tempsopt] (sse) {\ensuremath{\temps}};\&
+		\node[\temptopt] (ssee) {\ensuremath{\tempt}};\\
+	};
+}
+\makeatother
+
+% A B C
+% D E F
+% G H I
+% J K L
+% M N O
+\makeatletter
+\NewDocumentCommand{\threebyfive}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@threebyfivecont
+}
+\NewDocumentCommand{\@threebyfivecont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@threebyfivecontcont
+}
+\NewDocumentCommand{\@threebyfivecontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}
+	\@threebyfivecontcontcont
+}
+
+\NewDocumentCommand{\@threebyfivecontcontcont}{momo}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nnw) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nn) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (nne) {\ensuremath{\tempc}};\\
+		\node[\tempdopt] (nw) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (n) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (ne) {\ensuremath{\tempf}};\\
+		\node[\tempgopt] (w) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (c) {\ensuremath{\temph}};\&
+		\node[\tempiopt] (e) {\ensuremath{\tempi}};\\
+		\node[\tempjopt] (sw) {\ensuremath{\tempj}};\&
+		\node[\tempkopt] (s) {\ensuremath{\tempk}};\&
+		\node[\templopt] (se) {\ensuremath{\templ}};\\
+		\node[\tempmopt] (ssw) {\ensuremath{\tempm}};\&
+		\node[\tempnopt] (ss) {\ensuremath{\tempn}};\&
+		\node[\tempoopt] (sse) {\ensuremath{\tempo}};\\
+	};
+}
+\makeatother
+
+
+% A B C
+% D E F
+% G H I 
+% J K L
+% M N O 
+% P Q R
+\makeatletter
+\NewDocumentCommand{\threebysix}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@threebysixcont
+}
+\NewDocumentCommand{\@threebysixcont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@threebysixcontcont
+}
+\NewDocumentCommand{\@threebysixcontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}
+	\@threebysixcontcontcont
+}
+\NewDocumentCommand{\@threebysixcontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}
+	\@threebysixcontcontcontcont
+}
+\NewDocumentCommand{\@threebysixcontcontcontcont}{o}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nnnw) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nnn) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (nnne) {\ensuremath{\tempc}};\\
+		\node[\tempdopt] (nnw) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (nn) {\ensuremath{\tempe}};\&
+		\node[\tempfopt] (nne) {\ensuremath{\tempf}};\\
+		\node[\tempgopt] (nw) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (n) {\ensuremath{\temph}};\&
+		\node[\tempiopt] (ne) {\ensuremath{\tempi}};\\
+		\node[\tempjopt] (sw) {\ensuremath{\tempj}};\&
+		\node[\tempkopt] (s) {\ensuremath{\tempk}};\&
+		\node[\templopt] (se) {\ensuremath{\templ}};\\
+		\node[\tempmopt] (ssw) {\ensuremath{\tempm}};\&
+		\node[\tempnopt] (ss) {\ensuremath{\tempn}};\&
+		\node[\tempoopt] (sse) {\ensuremath{\tempo}};\\
+		\node[\temppopt] (sssw) {\ensuremath{\tempp}};\&
+		\node[\tempqopt] (sss) {\ensuremath{\tempq}};\&
+		\node[\tempropt] (ssse) {\ensuremath{\tempr}};\\
+	};
+}
+\makeatother
+
+% A B C D E
+% F G H I J
+% K L M N O
+\makeatletter
+\NewDocumentCommand{\fivebythree}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@fivebythreecont
+}
+\NewDocumentCommand{\@fivebythreecont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@fivebythreecontcont
+}
+\NewDocumentCommand{\@fivebythreecontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}
+	\@fivebythreecontcontcont
+}
+\NewDocumentCommand{\@fivebythreecontcontcont}{momo}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nw) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (n) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (ne) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (nee) {\ensuremath{\tempe}};\\
+		\node[\tempfopt] (ww) {\ensuremath{\tempf}};\&
+		\node[\tempgopt] (w) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (c) {\ensuremath{\temph}};\&
+		\node[\tempiopt] (e) {\ensuremath{\tempi}};\&
+		\node[\tempjopt] (ee) {\ensuremath{\tempj}};\\
+		\node[\tempkopt] (sww) {\ensuremath{\tempk}};\&
+		\node[\templopt] (sw) {\ensuremath{\templ}};\&
+		\node[\tempmopt] (s) {\ensuremath{\tempm}};\&
+		\node[\tempnopt] (se) {\ensuremath{\tempn}};\&
+		\node[\tempoopt] (see) {\ensuremath{\tempo}};\\
+	};
+}
+\makeatother
+
+
+% A B C D E
+% F G H I J
+% K L M N O
+% P Q R S T
+\makeatletter
+\NewDocumentCommand{\fivebyfour}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}
+	\@fivebyfourcont
+}
+\NewDocumentCommand{\@fivebyfourcont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}
+	\def\temph{\IfNoValueTF{#7}{}{#7}}
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}
+	\@fivebyfourcontcont
+}
+\NewDocumentCommand{\@fivebyfourcontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}
+	\def\templ{\IfNoValueTF{#6}{}{#6}}
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}
+	\@fivebyfourcontcontcontcont
+}
+\NewDocumentCommand{\@fivebyfourcontcontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}
+	\@fivebyfourcontcontcontcontcont
+}
+\NewDocumentCommand{\@fivebyfourcontcontcontcontcont}{omomo}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}
+	\def\temps{\IfNoValueTF{#2}{}{#2}}
+	\def\tempsopt{\IfNoValueTF{#3}{}{#3}}
+	\def\tempt{\IfNoValueTF{#4}{}{#4}}
+	\def\temptopt{\IfNoValueTF{#5}{}{#5}}
+	\matrix[objects,\tempmatopt]{
+		\node[\tempaopt] (nnww) {\ensuremath{\tempa}};\&
+		\node[\tempbopt] (nnw) {\ensuremath{\tempb}};\&
+		\node[\tempcopt] (nn) {\ensuremath{\tempc}};\&
+		\node[\tempdopt] (nne) {\ensuremath{\tempd}};\&
+		\node[\tempeopt] (nnee) {\ensuremath{\tempe}};\\
+		\node[\tempfopt] (nww) {\ensuremath{\tempf}};\&
+		\node[\tempgopt] (nw) {\ensuremath{\tempg}};\&
+		\node[\temphopt] (n) {\ensuremath{\temph}};\&
+		\node[\tempiopt] (ne) {\ensuremath{\tempi}};\&
+		\node[\tempjopt] (nee) {\ensuremath{\tempj}};\\
+		\node[\tempkopt] (sww) {\ensuremath{\tempk}};\&
+		\node[\templopt] (sw) {\ensuremath{\templ}};\&
+		\node[\tempmopt] (s) {\ensuremath{\tempm}};\&
+		\node[\tempnopt] (se) {\ensuremath{\tempn}};\&
+		\node[\tempoopt] (see) {\ensuremath{\tempo}};\\
+		\node[\temppopt] (ssww) {\ensuremath{\tempp}};\&
+		\node[\tempqopt] (ssw) {\ensuremath{\tempq}};\&
+		\node[\tempropt] (ss) {\ensuremath{\tempr}};\&
+		\node[\tempsopt] (sse) {\ensuremath{\temps}};\&
+		\node[\temptopt] (ssee) {\ensuremath{\tempt}};\\
+	};
+}
+\makeatother
+
+
+% A B C D E
+% F G H I J
+% K L M N O
+% P Q R S T
+% U V W X Y
+\makeatletter
+\NewDocumentCommand{\fivebyfive}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebyfivecont%
+}
+\NewDocumentCommand{\@fivebyfivecont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\temph{\IfNoValueTF{#7}{}{#7}}%
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebyfivecontcont%
+}
+\NewDocumentCommand{\@fivebyfivecontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\templ{\IfNoValueTF{#6}{}{#6}}%
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebyfivecontcontcontcont%
+}
+\NewDocumentCommand{\@fivebyfivecontcontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}%
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebyfivecontcontcontcontcont%
+}
+\NewDocumentCommand{\@fivebyfivecontcontcontcontcont}{omomomomo}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}%
+	\def\temps{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempsopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempt{\IfNoValueTF{#4}{}{#4}}%
+	\def\temptopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempu{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempuopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempv{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempvopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebyfivecontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@fivebyfivecontcontcontcontcontcont}{momomo}{
+	\def\tempw{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempwopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempx{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempxopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempy{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempyopt{\IfNoValueTF{#6}{}{#6}}%
+	\matrix[objects,\tempmatopt]{%
+		\node[\tempaopt] (nnww) {\ensuremath{\tempa}};\&%
+		\node[\tempbopt] (nnw) {\ensuremath{\tempb}};\&%
+		\node[\tempcopt] (nn) {\ensuremath{\tempc}};\&%
+		\node[\tempdopt] (nne) {\ensuremath{\tempd}};\&%
+		\node[\tempeopt] (nnee) {\ensuremath{\tempe}};\\%
+		\node[\tempfopt] (nww) {\ensuremath{\tempf}};\&%
+		\node[\tempgopt] (nw) {\ensuremath{\tempg}};\&%
+		\node[\temphopt] (n) {\ensuremath{\temph}};\&%
+		\node[\tempiopt] (ne) {\ensuremath{\tempi}};\&%
+		\node[\tempjopt] (nee) {\ensuremath{\tempj}};\\%
+		\node[\tempkopt] (ww) {\ensuremath{\tempk}};\&%
+		\node[\templopt] (w) {\ensuremath{\templ}};\&%
+		\node[\tempmopt] (c) {\ensuremath{\tempm}};\&%
+		\node[\tempnopt] (e) {\ensuremath{\tempn}};\&%
+		\node[\tempoopt] (ee) {\ensuremath{\tempo}};\\%
+		\node[\temppopt] (sww) {\ensuremath{\tempp}};\&%
+		\node[\tempqopt] (sw) {\ensuremath{\tempq}};\&%
+		\node[\tempropt] (s) {\ensuremath{\tempr}};\&%
+		\node[\tempsopt] (se) {\ensuremath{\temps}};\&%
+		\node[\temptopt] (see) {\ensuremath{\tempt}};\\%
+		\node[\tempuopt] (ssww) {\ensuremath{\tempu}};\&%
+		\node[\tempvopt] (ssw) {\ensuremath{\tempv}};\&%
+		\node[\tempwopt] (ss) {\ensuremath{\tempw}};\&%
+		\node[\tempxopt] (sse) {\ensuremath{\tempx}};\&%
+		\node[\tempyopt] (ssee) {\ensuremath{\tempy}};\\%
+	};
+}
+\makeatother
+
+
+% A B C D E F
+% G H I J K L
+% M N O P Q R
+% S T U V W X
+\makeatletter
+\NewDocumentCommand{\sixbyfour}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbyfourcont%
+}
+\NewDocumentCommand{\@sixbyfourcont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\temph{\IfNoValueTF{#7}{}{#7}}%
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbyfourcontcont%
+}
+\NewDocumentCommand{\@sixbyfourcontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\templ{\IfNoValueTF{#6}{}{#6}}%
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbyfourcontcontcontcont%
+}
+\NewDocumentCommand{\@sixbyfourcontcontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}%
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbyfourcontcontcontcontcont%
+}
+\NewDocumentCommand{\@sixbyfourcontcontcontcontcont}{omomomomo}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}%
+	\def\temps{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempsopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempt{\IfNoValueTF{#4}{}{#4}}%
+	\def\temptopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempu{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempuopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempv{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempvopt{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbyfourcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@sixbyfourcontcontcontcontcontcont}{momo}{
+	\def\tempw{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempwopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempx{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempxopt{\IfNoValueTF{#4}{}{#4}}%
+	\matrix[objects,\tempmatopt]{%
+		\node[\tempaopt] (nnwww) {\ensuremath{\tempa}};\&%
+		\node[\tempbopt] (nnww) {\ensuremath{\tempb}};\&%
+		\node[\tempcopt] (nnw) {\ensuremath{\tempc}};\&%
+		\node[\tempdopt] (nne) {\ensuremath{\tempd}};\&%
+		\node[\tempeopt] (nnee) {\ensuremath{\tempe}};\&%
+		\node[\tempfopt] (nneee) {\ensuremath{\tempf}};\\%
+		\node[\tempgopt] (nwww) {\ensuremath{\tempg}};\&%
+		\node[\temphopt] (nww) {\ensuremath{\temph}};\&%
+		\node[\tempiopt] (nw) {\ensuremath{\tempi}};\&%
+		\node[\tempjopt] (ne) {\ensuremath{\tempj}};\&%
+		\node[\tempkopt] (nee) {\ensuremath{\tempk}};\&%
+		\node[\templopt] (neee) {\ensuremath{\templ}};\\%
+		\node[\tempmopt] (swww) {\ensuremath{\tempm}};\&%
+		\node[\tempnopt] (sww) {\ensuremath{\tempn}};\&%
+		\node[\tempoopt] (sw) {\ensuremath{\tempo}};\&%
+		\node[\temppopt] (se) {\ensuremath{\tempp}};\&%
+		\node[\tempqopt] (see) {\ensuremath{\tempq}};\&%
+		\node[\tempropt] (seee) {\ensuremath{\tempr}};\\%
+		\node[\tempsopt] (sswww) {\ensuremath{\temps}};\&%
+		\node[\temptopt] (ssww) {\ensuremath{\tempt}};\&%
+		\node[\tempuopt] (ssw) {\ensuremath{\tempu}};\&%
+		\node[\tempvopt] (sse) {\ensuremath{\tempv}};\&%
+		\node[\tempwopt] (ssee) {\ensuremath{\tempw}};\&%
+		\node[\tempxopt] (sseee) {\ensuremath{\tempx}};\\%
+	};
+}
+\makeatother
+
+
+
+
+% A B C D
+% E F G H 
+% I J K L
+% M N O P
+% Q R S T 
+% U V W X
+\makeatletter
+\NewDocumentCommand{\fourbysix}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fourbysixcont%
+}
+\NewDocumentCommand{\@fourbysixcont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\temph{\IfNoValueTF{#7}{}{#7}}%
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}%
+	\@fourbysixcontcont%
+}
+\NewDocumentCommand{\@fourbysixcontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\templ{\IfNoValueTF{#6}{}{#6}}%
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fourbysixcontcontcont%
+}
+\NewDocumentCommand{\@fourbysixcontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}%
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}%
+	\@fourbysixcontcontcontcont%
+}
+\NewDocumentCommand{\@fourbysixcontcontcontcont}{omomomomo}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}%
+	\def\temps{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempsopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempt{\IfNoValueTF{#4}{}{#4}}%
+	\def\temptopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempu{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempuopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempv{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempvopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fourbysixcontcontcontcontcont%
+}
+\NewDocumentCommand{\@fourbysixcontcontcontcontcont}{momo}{
+	\def\tempw{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempwopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempx{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempxopt{\IfNoValueTF{#4}{}{#4}}%
+	\matrix[objects,\tempmatopt]{%
+		\node[\tempaopt] (nnnww) {\ensuremath{\tempa}};\&%
+		\node[\tempbopt] (nnnw) {\ensuremath{\tempb}};\&%
+		\node[\tempcopt] (nnne) {\ensuremath{\tempc}};\&%
+		\node[\tempdopt] (nnnee) {\ensuremath{\tempd}};\\%
+		\node[\tempeopt] (nnww) {\ensuremath{\tempe}};\&%
+		\node[\tempfopt] (nnw) {\ensuremath{\tempf}};\&%
+		\node[\tempgopt] (nne) {\ensuremath{\tempg}};\&%
+		\node[\temphopt] (nnee) {\ensuremath{\temph}};\\%
+		\node[\tempiopt] (nww) {\ensuremath{\tempi}};\&%
+		\node[\tempjopt] (nw) {\ensuremath{\tempj}};\&%
+		\node[\tempkopt] (ne) {\ensuremath{\tempk}};\&%
+		\node[\templopt] (nee) {\ensuremath{\templ}};\\%
+		\node[\tempmopt] (sww) {\ensuremath{\tempm}};\&%
+		\node[\tempnopt] (sw) {\ensuremath{\tempn}};\&%
+		\node[\tempoopt] (se) {\ensuremath{\tempo}};\&%
+		\node[\temppopt] (see) {\ensuremath{\tempp}};\\%
+		\node[\tempqopt] (ssww) {\ensuremath{\tempq}};\&%
+		\node[\tempropt] (ssw) {\ensuremath{\tempr}};\&%
+		\node[\tempsopt] (sse) {\ensuremath{\temps}};\&%
+		\node[\temptopt] (ssee) {\ensuremath{\tempt}};\\%
+		\node[\tempuopt] (sssww) {\ensuremath{\tempu}};\&%
+		\node[\tempvopt] (sssw) {\ensuremath{\tempv}};\&%
+		\node[\tempwopt] (ssse) {\ensuremath{\tempw}};\&%
+		\node[\tempxopt] (sssee) {\ensuremath{\tempx}};\\%
+	};
+}
+\makeatother
+
+
+% A  B  C  D  E  
+% F  G  H  I  J  
+% K  L  M  N  O  
+% P  Q  R  S  T
+% U  V  W  X  Y  
+% Z  AA BB CC DD
+\makeatletter
+\NewDocumentCommand{\fivebysix}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysixcont%
+}
+\NewDocumentCommand{\@fivebysixcont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\temph{\IfNoValueTF{#7}{}{#7}}%
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysixcontcont%
+}
+\NewDocumentCommand{\@fivebysixcontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\templ{\IfNoValueTF{#6}{}{#6}}%
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysixcontcontcont%
+}
+\NewDocumentCommand{\@fivebysixcontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}%
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysixcontcontcontcont%
+}
+\NewDocumentCommand{\@fivebysixcontcontcontcont}{omomomomo}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}%
+	\def\temps{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempsopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempt{\IfNoValueTF{#4}{}{#4}}%
+	\def\temptopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempu{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempuopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempv{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempvopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysixcontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@fivebysixcontcontcontcontcontcontcont}{momomomom}{
+	\def\tempw{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempwopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempx{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempxopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempy{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempyopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempz{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempzopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempaa{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysixcontcontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@fivebysixcontcontcontcontcontcontcontcont}{omomomo}{
+	\def\tempaaopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempbb{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempbbopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempcc{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempccopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempdd{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempddopt{\IfNoValueTF{#7}{}{#7}}%
+	\matrix[objects,\tempmatopt]{%
+		\node[\tempaopt] (nnnww) {\ensuremath{\tempa}};\&%
+		\node[\tempbopt] (nnnw) {\ensuremath{\tempb}};\&%
+		\node[\tempcopt] (nnn) {\ensuremath{\tempc}};\&%
+		\node[\tempdopt] (nnne) {\ensuremath{\tempd}};\&%
+		\node[\tempeopt] (nnnee) {\ensuremath{\tempe}};\\%
+		\node[\tempfopt] (nnww) {\ensuremath{\tempf}};\&%
+		\node[\tempgopt] (nnw) {\ensuremath{\tempg}};\&%
+		\node[\temphopt] (nn) {\ensuremath{\temph}};\&%
+		\node[\tempiopt] (nne) {\ensuremath{\tempi}};\&%
+		\node[\tempjopt] (nnee) {\ensuremath{\tempj}};\\%
+		\node[\tempkopt] (nww) {\ensuremath{\tempk}};\&%
+		\node[\templopt] (nw) {\ensuremath{\templ}};\&%
+		\node[\tempmopt] (n) {\ensuremath{\tempm}};\&%
+		\node[\tempnopt] (ne) {\ensuremath{\tempn}};\&%
+		\node[\tempoopt] (nee) {\ensuremath{\tempo}};\\%
+		\node[\temppopt] (sww) {\ensuremath{\tempp}};\&%
+		\node[\tempqopt] (sw) {\ensuremath{\tempq}};\&%
+		\node[\tempropt] (s) {\ensuremath{\tempr}};\&%
+		\node[\tempsopt] (se) {\ensuremath{\temps}};\&%
+		\node[\temptopt] (see) {\ensuremath{\tempt}};\\%
+		\node[\tempuopt] (ssww) {\ensuremath{\tempu}};\&%
+		\node[\tempvopt] (ssw) {\ensuremath{\tempv}};\&%
+		\node[\tempwopt] (ss) {\ensuremath{\tempw}};\&%
+		\node[\tempxopt] (sse) {\ensuremath{\tempx}};\&%
+		\node[\tempyopt] (ssee) {\ensuremath{\tempy}};\\%
+		\node[\tempzopt] (sssww) {\ensuremath{\tempz}};\&%
+		\node[\tempaaopt] (sssw) {\ensuremath{\tempaa}};\&%
+		\node[\tempbbopt] (sss) {\ensuremath{\tempbb}};\&%
+		\node[\tempccopt] (ssse) {\ensuremath{\tempcc}};\&%
+		\node[\tempddopt] (sssee) {\ensuremath{\tempdd}};\\%
+	};
+}
+\makeatother
+
+
+
+% A  B  C  D  E  F
+% G  H  I  J  K  L
+% M  N  O  P  Q  R
+% S  T  U  V  W  X
+% Y  Z  AA BB CC DD
+% EE FF GG HH II JJ
+\makeatletter
+\NewDocumentCommand{\sixbysix}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbysixcont%
+}
+\NewDocumentCommand{\@sixbysixcont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\temph{\IfNoValueTF{#7}{}{#7}}%
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbysixcontcont%
+}
+\NewDocumentCommand{\@sixbysixcontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\templ{\IfNoValueTF{#6}{}{#6}}%
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbysixcontcontcont%
+}
+\NewDocumentCommand{\@sixbysixcontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}%
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbysixcontcontcontcont%
+}
+\NewDocumentCommand{\@sixbysixcontcontcontcont}{omomomomo}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}%
+	\def\temps{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempsopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempt{\IfNoValueTF{#4}{}{#4}}%
+	\def\temptopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempu{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempuopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempv{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempvopt{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbysixcontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@sixbysixcontcontcontcontcontcontcont}{momomomom}{
+	\def\tempw{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempwopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempx{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempxopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempy{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempyopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempz{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempzopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempaa{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbysixcontcontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@sixbysixcontcontcontcontcontcontcontcont}{omomomomo}{
+	\def\tempaaopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempbb{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempbbopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempcc{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempccopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempdd{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempddopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempee{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempeeopt{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbysixcontcontcontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@sixbysixcontcontcontcontcontcontcontcontcont}{momomomom}{
+	\def\tempff{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempffopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempgg{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempggopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\temphh{\IfNoValueTF{#5}{}{#5}}%
+	\def\temphhopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempii{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempiiopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempjj{\IfNoValueTF{#9}{}{#9}}%
+	\@sixbysixcontcontcontcontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@sixbysixcontcontcontcontcontcontcontcontcontcont}{o}{
+	\def\tempjjopt{\IfNoValueTF{#1}{}{#1}}%
+	\matrix[objects,\tempmatopt]{%
+		\node[\tempaopt] (nnnwww) {\ensuremath{\tempa}};\&%
+		\node[\tempbopt] (nnnww) {\ensuremath{\tempb}};\&%
+		\node[\tempcopt] (nnnw) {\ensuremath{\tempc}};\&%
+		\node[\tempdopt] (nnne) {\ensuremath{\tempd}};\&%
+		\node[\tempeopt] (nnnee) {\ensuremath{\tempe}};\&%
+		\node[\tempfopt] (nnneee) {\ensuremath{\tempf}};\\%
+		\node[\tempgopt] (nnwww) {\ensuremath{\tempg}};\&%
+		\node[\temphopt] (nnww) {\ensuremath{\temph}};\&%
+		\node[\tempiopt] (nnw) {\ensuremath{\tempi}};\&%
+		\node[\tempjopt] (nne) {\ensuremath{\tempj}};\&%
+		\node[\tempkopt] (nnee) {\ensuremath{\tempk}};\&%
+		\node[\templopt] (nneee) {\ensuremath{\templ}};\\%
+		\node[\tempmopt] (nwww) {\ensuremath{\tempm}};\&%
+		\node[\tempnopt] (nww) {\ensuremath{\tempn}};\&%
+		\node[\tempoopt] (nw) {\ensuremath{\tempo}};\&%
+		\node[\temppopt] (ne) {\ensuremath{\tempp}};\&%
+		\node[\tempqopt] (nee) {\ensuremath{\tempq}};\&%
+		\node[\tempropt] (neee) {\ensuremath{\tempr}};\\%
+		\node[\tempsopt] (swww) {\ensuremath{\temps}};\&%
+		\node[\temptopt] (sww) {\ensuremath{\tempt}};\&%
+		\node[\tempuopt] (sw) {\ensuremath{\tempu}};\&%
+		\node[\tempvopt] (se) {\ensuremath{\tempv}};\&%
+		\node[\tempwopt] (see) {\ensuremath{\tempw}};\&%
+		\node[\tempxopt] (seee) {\ensuremath{\tempx}};\\%
+		\node[\tempyopt] (sswww) {\ensuremath{\tempy}};\&%
+		\node[\tempzopt] (ssww) {\ensuremath{\tempz}};\&%
+		\node[\tempaaopt] (ssw) {\ensuremath{\tempaa}};\&%
+		\node[\tempbbopt] (sse) {\ensuremath{\tempbb}};\&%
+		\node[\tempccopt] (ssee) {\ensuremath{\tempcc}};\&%
+		\node[\tempddopt] (sseee) {\ensuremath{\tempdd}};\\%
+		\node[\tempeeopt] (ssswww) {\ensuremath{\tempee}};\&%
+		\node[\tempffopt] (sssww) {\ensuremath{\tempff}};\&%
+		\node[\tempggopt] (sssw) {\ensuremath{\tempgg}};\&%
+		\node[\temphhopt] (ssse) {\ensuremath{\temphh}};\&%
+		\node[\tempiiopt] (sssee) {\ensuremath{\tempii}};\&%
+		\node[\tempjjopt] (ssseee) {\ensuremath{\tempjj}};\\%
+	};
+}
+\makeatother
+
+
+
+% A  B  C  D  E  
+% F  G  H  I  J  
+% K  L  M  N  O
+% P  Q  R  S  T  
+% U  V  W  X  Y  
+% Z  AA BB CC DD
+% EE FF GG HH II
+\makeatletter
+\NewDocumentCommand{\fivebyseven}{omomomomo}{
+	\def\tempmatopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempa{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempaopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempb{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempbopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempc{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempcopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempd{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempdopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysevencont%
+}
+\NewDocumentCommand{\@fivebysevencont}{momomomom}{
+	\def\tempe{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempeopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempf{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempfopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempg{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempgopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\temph{\IfNoValueTF{#7}{}{#7}}%
+	\def\temphopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempi{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysevencontcont%
+}
+\NewDocumentCommand{\@fivebysevencontcont}{omomomomo}{
+	\def\tempiopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempj{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempjopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempk{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempkopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\templ{\IfNoValueTF{#6}{}{#6}}%
+	\def\templopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempm{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempmopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysevencontcontcont%
+}
+\NewDocumentCommand{\@fivebysevencontcontcont}{momomomom}{
+	\def\tempn{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempnopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempo{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempoopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempp{\IfNoValueTF{#5}{}{#5}}%
+	\def\temppopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempq{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempqopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempr{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysevencontcontcontcont%
+}
+\NewDocumentCommand{\@fivebysevencontcontcontcont}{omomomomo}{
+	\def\tempropt{\IfNoValueTF{#1}{}{#1}}%
+	\def\temps{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempsopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempt{\IfNoValueTF{#4}{}{#4}}%
+	\def\temptopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempu{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempuopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempv{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempvopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysevencontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@fivebysevencontcontcontcontcontcontcont}{momomomom}{
+	\def\tempw{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempwopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempx{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempxopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempy{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempyopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempz{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempzopt{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempaa{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysevencontcontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@fivebysevencontcontcontcontcontcontcontcont}{omomomomo}{
+	\def\tempaaopt{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempbb{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempbbopt{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempcc{\IfNoValueTF{#4}{}{#4}}%
+	\def\tempccopt{\IfNoValueTF{#5}{}{#5}}%
+	\def\tempdd{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempddopt{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempee{\IfNoValueTF{#8}{}{#8}}%
+	\def\tempeeopt{\IfNoValueTF{#9}{}{#9}}%
+	\@fivebysevencontcontcontcontcontcontcontcontcont%
+}
+\NewDocumentCommand{\@fivebysevencontcontcontcontcontcontcontcontcont}{momomomo}{
+	\def\tempff{\IfNoValueTF{#1}{}{#1}}%
+	\def\tempffopt{\IfNoValueTF{#2}{}{#2}}%
+	\def\tempgg{\IfNoValueTF{#3}{}{#3}}%
+	\def\tempggopt{\IfNoValueTF{#4}{}{#4}}%
+	\def\temphh{\IfNoValueTF{#5}{}{#5}}%
+	\def\temphhopt{\IfNoValueTF{#6}{}{#6}}%
+	\def\tempii{\IfNoValueTF{#7}{}{#7}}%
+	\def\tempiiopt{\IfNoValueTF{#8}{}{#8}}%
+	\matrix[objects,\tempmatopt]{%
+		\node[\tempaopt] (nnnww) {\ensuremath{\tempa}};\&%
+		\node[\tempbopt] (nnnw) {\ensuremath{\tempb}};\&%
+		\node[\tempcopt] (nnn) {\ensuremath{\tempc}};\&%
+		\node[\tempdopt] (nnne) {\ensuremath{\tempd}};\&%
+		\node[\tempeopt] (nnnee) {\ensuremath{\tempe}};\\%
+		\node[\tempfopt] (nnww) {\ensuremath{\tempf}};\&%
+		\node[\tempgopt] (nnw) {\ensuremath{\tempg}};\&%
+		\node[\temphopt] (nn) {\ensuremath{\temph}};\&%
+		\node[\tempiopt] (nne) {\ensuremath{\tempi}};\&%
+		\node[\tempjopt] (nnee) {\ensuremath{\tempj}};\\%
+		\node[\tempkopt] (nww) {\ensuremath{\tempk}};\&%
+		\node[\templopt] (nw) {\ensuremath{\templ}};\&%
+		\node[\tempmopt] (n) {\ensuremath{\tempm}};\&%
+		\node[\tempnopt] (ne) {\ensuremath{\tempn}};\&%
+		\node[\tempoopt] (nee) {\ensuremath{\tempo}};\\%
+		\node[\temppopt] (ww) {\ensuremath{\tempp}};\&%
+		\node[\tempqopt] (w) {\ensuremath{\tempq}};\&%
+		\node[\tempropt] (c) {\ensuremath{\tempr}};\&%
+		\node[\tempsopt] (e) {\ensuremath{\temps}};\&%
+		\node[\temptopt] (ee) {\ensuremath{\tempt}};\\%
+		\node[\tempuopt] (sww) {\ensuremath{\tempu}};\&%
+		\node[\tempvopt] (sw) {\ensuremath{\tempv}};\&%
+		\node[\tempwopt] (s) {\ensuremath{\tempw}};\&%
+		\node[\tempxopt] (se) {\ensuremath{\tempx}};\&%
+		\node[\tempyopt] (see) {\ensuremath{\tempy}};\\%
+		\node[\tempzopt] (ssww) {\ensuremath{\tempz}};\&%
+		\node[\tempaaopt] (ssw) {\ensuremath{\tempaa}};\&%
+		\node[\tempbbopt] (ss) {\ensuremath{\tempbb}};\&%
+		\node[\tempccopt] (sse) {\ensuremath{\tempcc}};\&%
+		\node[\tempddopt] (ssee) {\ensuremath{\tempdd}};\\%
+		\node[\tempeeopt] (sssww) {\ensuremath{\tempee}};\&%
+		\node[\tempffopt] (sssw) {\ensuremath{\tempff}};\&%
+		\node[\tempggopt] (sss) {\ensuremath{\tempgg}};\&%
+		\node[\temphhopt] (ssse) {\ensuremath{\temphh}};\&%
+		\node[\tempiiopt] (sssee) {\ensuremath{\tempii}};\\%
+	};
+}
+\makeatother
+
+% --- end package declaration
+
+\ProcessOptions\relax
+\endinput

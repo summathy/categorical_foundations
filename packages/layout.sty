@@ -1,0 +1,436 @@
+%\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{layout}
+
+% ===== Package Requirements =====
+
+% --- meta ---
+\RequirePackage{xparse}						% NewDocumentCommand, NewDocumentEnvironment
+\RequirePackage{keyval}						% define@key, setkeys
+\RequirePackage{etoolbox}					% ifdefempty
+% \RequirePackage{pdfsync}					% TODO how does it work?
+% \RequirePackage{cleverref}				% TODO what does it do?
+
+% --- lists and tables ---
+\RequirePackage[shortlabels]{enumitem}		% newlist, setlist
+% \RequirePackage{tabularx}
+% \RequirePackage{tabu}
+% \RequirePackage{makecell}
+
+% --- page formatting ---
+\RequirePackage{mdframed}					% mdframed
+\RequirePackage{geometry}					% geometry
+\RequirePackage[parfill]{parskip}			% removes paragraph indent
+\RequirePackage[utf8]{inputenc}				% TODO what does it do?
+\RequirePackage{changepage}					% adjustwidth
+\RequirePackage{pdfpages}					% includepdf
+% \RequirePackage{placeins}					% TODO what does it do?
+
+% --- styling ---
+\RequirePackage[hidelinks]{hyperref}		% hypertarget, hyperlink
+\RequirePackage{xcolor}						% textcolor
+\RequirePackage{sectsty}					% sectionfont
+% \RequirePackage{graphicx}					% TODO what does it do?
+\RequirePackage{csquotes}					% enquote
+
+% --- fonts and symbols ---
+\RequirePackage{amsmath}					% most math stuff
+\RequirePackage{amssymb}					% square, diamond, triangle
+\RequirePackage{stmaryrd}					% lightning
+\RequirePackage[bbgreekl]{mathbbol}			% greek double stroke
+\RequirePackage{mathrsfs}					% mathscr
+% \RequirePackage{mathtools}				% TODO what does it do?
+% \RequirePackage{fixmath}					% TODO what does it do?
+\RequirePackage{tikzsymbols}				% coffeecup
+\RequirePackage{romanbar}					% roman numerals
+
+
+% ===== page layout =====
+
+% \RequirePackage{geometry}
+% \RequirePackage[parfill]{parskip}	% removes paragraph indent
+% \RequirePackage[utf8]{inputenc}		% TODO what does it do?
+% \RequirePackage{minipage}
+% \RequirePackage{sectsty}
+% \RequirePackage[hidelinks]{hyperref}		% hypertarget, hyperlink
+
+% --- A4 formatting ---
+\geometry{a4paper, margin=3cm}
+
+% \usepackage{setspace}
+% \setstretch{1.2}
+
+\setlength{\parskip}{\medskipamount}
+\newcommand{\@minipagerestore}{\setlength{\parskip}{\medskipamount}}
+
+% TODO pdfsync?
+
+% --- color scheme ---
+\definecolor{darkred}{HTML}{990000}
+\definecolor{darkgreen}{HTML}{007700}
+\definecolor{darkblue}{HTML}{000099}
+\definecolor{darkorange}{HTML}{DD6600}
+
+\definecolor{lightblue}{HTML}{5CACEA}
+
+\definecolor{thmcolor}{HTML}{CC6600} %darkorange
+\definecolor{thmrefcolor}{HTML}{CC6600} %darkorange
+
+%\definecolor{bibcolor}{HTML}{1886b9} 
+%\definecolor{bibrefcolor}{HTML}{1886b9}
+\definecolor{bibcolor}{HTML}{292975} 
+\definecolor{bibrefcolor}{HTML}{292975}
+
+\definecolor{grayA}{HTML}{4C4C4C}
+\definecolor{grayB}{HTML}{666666}
+\definecolor{redA}{HTML}{ED6D50}
+\definecolor{redB}{HTML}{D35133}
+\definecolor{orangeA}{HTML}{FC910d}
+\definecolor{orangeB}{HTML}{FCB12E}
+\definecolor{blueA}{HTML}{1674B1}
+\definecolor{blueB}{HTML}{239CD3}
+
+
+% --- section colors ---
+\sectionfont{\color{darkred}}
+\subsectionfont{\color{darkred}}
+\subsubsectionfont{\color{darkred}}
+
+% --- hyperref layout ---
+\hypersetup{
+	colorlinks=false,
+	%linkcolor=darkblue,
+	%filecolor=magenta,      
+	urlcolor=darkblue
+}
+\urlstyle{same}
+
+
+
+% ===== Providing TODO =====
+% \RequirePackage{xcolor} 		% color
+% \RequirePackage{xparse} 		% NewDocumentCommand
+
+\NewDocumentCommand{\TODO}{m}{\textcolor{red}{#1}}
+\NewDocumentCommand{\REF}{o}{\IfNoValueTF{#1}{}{\textcolor{red}{#1}}}
+
+
+
+% ===== Providing Tabulator =====
+% \RequirePackage{xparse} 		% NewDocumentEnvironment
+% \RequirePackage{changepage} 	% adjustwidth
+
+\NewDocumentEnvironment{tab}{o}{
+	\begin{adjustwidth}{\IfNoValueTF{#1}{1cm}{#1}}{}%
+}{
+	\end{adjustwidth}%
+}
+
+
+
+% ===== Providing Unnumbered § Paragraphs =====
+
+% \RequirePackage{xparse}		% NewDocumentCommand
+% \RequirePackage{xcolor}		% textcolor
+
+\NewDocumentCommand{\parsection}{mo}{%
+	\section*{\S\hspace{.5em}#1}%
+	\IfNoValueTF{#2}{}{%
+		\label{#2}%
+		\addcontentsline{toc}{section}{\textcolor[HTML]{555555}{#1}}%
+	}%
+}
+
+\NewDocumentCommand{\parsubsection}{mo}{%
+	\subsection*{\S\hspace{.5em}#1}%
+	\IfNoValueTF{#2}{}{%
+		\label{#2}%
+		\addcontentsline{toc}{subsection}{\textcolor[HTML]{555555}{#1}}%
+	}%
+}
+
+\NewDocumentCommand{\parsubsubsection}{mo}{%
+	\subsubsection*{\S\hspace{.5em}#1}%
+	\IfNoValueTF{#2}{}{%
+		\label{#2}%
+		\addcontentsline{toc}{subsubsection}{\textcolor[HTML]{555555}{#1}}%
+	}%
+}
+
+
+
+% ===== Providing Theorems =====
+
+% \RequirePackage{xparse}			% NewDocumentEnvironment
+% \RequirePackage{xcolor}			% textcolor
+% \RequirePackage{mdframed}			% mdframed
+% \RequirePackage{amssymb}			% square, diamond, triangle
+% \RequirePackage{stdmaryrd}		% lightning
+
+% === theorem counter ===
+\newcounter{theoremcounter}[subsection]
+\renewcommand{\thetheoremcounter}{\thesubsection.\arabic{theoremcounter}}
+
+\numberwithin{equation}{theoremcounter}
+
+% === environments ===
+
+\NewDocumentEnvironment{definition}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{Definition \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{lemma}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{Lemma \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{proposition}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{Proposition \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{proposition2}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{$\star$ Proposition \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{theorem}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{Theorem \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{corollary}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{Corollary \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{example}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=false, rightline=false, topline=false, bottomline=false, linewidth=0pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{Example \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{remark}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{Remark \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{remark2}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{$\star$ Remark \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{exercise}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{\Coffeecup Exercise \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{exercise2}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=black,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{\Coffeecup\Coffeecup Exercise \thetheoremcounter}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{convention}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=darkred,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{\textcolor{darkred}{Convention \thetheoremcounter}}\IfNoValueTF{#1}{}{ (\textcolor{thmcolor}{#1})}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentEnvironment{axiom}{o}{
+	\vspace{6pt}
+	\begin{mdframed}[%
+		leftmargin=-6pt, innerleftmargin=5pt, rightmargin=-6pt, innerrightmargin=5pt, innertopmargin=6pt%
+		leftline=true, rightline=false, topline=false, bottomline=false, linewidth=1pt, linecolor=darkorange,%
+	]%
+	\refstepcounter{theoremcounter}
+	\textbf{\textcolor{darkorange}{Axiom \thetheoremcounter}}\IfNoValueTF{#1}{}{ \textcolor{darkorange}{(#1)}}
+	\vspace{3pt}\newline
+}{
+	\end{mdframed}
+}
+
+\NewDocumentCommand{\thmref}{m}{%
+	\textcolor{thmrefcolor}{\ref{#1}}%
+}
+
+\NewDocumentEnvironment{proof}{}{
+	\begin{enumerate}[topsep=.5\baselineskip, align=left, labelwidth=1cm, leftmargin=1.15cm]
+	\item[\textit{Proof}]
+}{
+	\textcolor{white}{.}\hfill$\square$
+	\end{enumerate}
+}
+
+\NewDocumentEnvironment{sketch}{}{
+	\begin{enumerate}[topsep=.5\baselineskip, align=left, labelwidth=1cm, leftmargin=1.15cm]
+	\item[\textit{Sketch}]
+}{
+	\textcolor{white}{.}\hfill$\Diamond$
+	\end{enumerate}
+}
+
+\NewDocumentEnvironment{claim}{}{
+	\begin{enumerate}[topsep=.5\baselineskip, align=left, labelwidth=1cm, leftmargin=1.15cm]
+	\item[\textit{Claim}]
+}{
+	\textcolor{white}{.}\hfill$\triangle$
+	\end{enumerate}
+}
+
+\NewDocumentEnvironment{assume}{}{
+	\begin{enumerate}[topsep=.5\baselineskip, align=left, labelwidth=1cm, leftmargin=1.15cm]
+	\item[\textit{Assume}]
+}{
+	\textcolor{white}{.}\hfill$\lightning$
+	\end{enumerate}
+}
+
+
+
+% ===== Providing Bibliography =====
+
+% \RequirePackage[shortlabels]{enumitem}		% newlist, setlist
+% \RequirePackage{xparse}						% NewDocumentCommand
+% \RequirePackage{keyval}						% define@key, setkeys
+% \RequirePackage[hidelinks]{hyperref}		% hypertarget, hyperlink
+% \RequirePackage{etoolbox}					% ifdefempty
+
+% TODO bibrefcolor
+% TODO bibrefindent
+
+
+\makeatletter
+	% === define bibsource keys ===
+	\define@key{bibsource}{title}{\def\bibsource@title{#1}}
+	\define@key{bibsource}{authors}{\def\bibsource@authors{#1}}
+	\define@key{bibsource}{pub}{\def\bibsource@pub{#1}}
+	\define@key{bibsource}{link}{\def\bibsource@link{#1}}
+	\define@key{bibsource}{note}{\def\bibsource@note{#1}}
+
+	% === set defaults ===
+	\setkeys{bibsource}{title={TITLE}, authors={AUTHORS}, pub={}, link={}, note={}}
+
+	% === define bibsource list ===
+	\newlist{@bibsourcelist}{enumerate}{5}
+	\setlist[@bibsourcelist]{topsep=.5\baselineskip, align=left, labelwidth=1.5cm, leftmargin=1.65cm}
+
+	% === define bibsource command ===
+	\NewDocumentCommand{\biblabel}{m}{
+		\hypertarget{#1}{}%
+		[\textcolor{bibcolor}{#1}]
+	}
+
+	\NewDocumentCommand{\bibsource}{mo}{ % parameters: handle + options
+		\begingroup%
+		\setkeys{bibsource}{#2}%
+		\begin{@bibsourcelist}%
+			\hypertarget{#1}{}%
+			\item[{[\textcolor{bibcolor}{#1}]}]{%
+				\bibsource@authors{ -- }\textit{\bibsource@title}%
+				\ifdefempty{\bibsource@pub}{}{\newline\bibsource@pub}%
+				\ifdefempty{\bibsource@link}{}{\newline\bibsource@link}%
+				\ifdefempty{\bibsource@note}{}{\newline\bibsource@note}
+			}%
+		\end{@bibsourcelist}%
+		\endgroup%
+	}
+
+	% === define bibref command ===
+	\NewDocumentCommand{\bibref}{m}{%
+		\hyperlink{#1}{[\textcolor{bibrefcolor}{#1}]}%
+	}
+\makeatother

@@ -1,0 +1,358 @@
+\ProvidesPackage{notation}
+
+% ===== Package Requirements =====
+\RequirePackage{xparse}					% NewDocumentCommand
+\RequirePackage{bbm}					% mathbbm
+\RequirePackage{graphicx}				% rotatebox
+\RequirePackage{amsmath}				% DeclareMathOperator
+\RequirePackage{amssymb}				% math symbols like pitchfork
+\RequirePackage{mathrsfs}				% mathscr
+\RequirePackage{stmaryrd}				% mapsfrom
+% \RequirePackage{mathtools}			% TODO what does it do?
+% \RequirePackage{fixmath}				% TODO what does it do?
+\RequirePackage{tikzsymbols}			% coffeecup
+\RequirePackage{romanbar}				% roman numerals
+\RequirePackage[bbgreekl]{mathbbol}		% greek double stroke
+
+
+
+% ==== Convenient stacking =====
+
+\NewDocumentCommand{\stacktwo}{mm}{\begin{array}{cc}#1\\#2\end{array}}
+\NewDocumentCommand{\stackover}{mm}{
+	\begin{array}{cc}
+		\text{\footnotesize\ensuremath{#1}}\vspace{-.25em}\\#2
+	\end{array}
+}
+
+% ==== footnotesize math ====
+
+\NewDocumentCommand{\footmath}{m}{\text{\footnotesize{\ensuremath{#1}}}}
+
+
+% ===== Arrows =====
+
+% TODO provide short arrows
+% TODO provide long arrows
+% TODO provide extendible arrows
+
+% TODO mono, epi, incl, mapsto, distributor, lax morphism
+
+\NewDocumentCommand{\Nearrow}{}{\rotatebox[origin=c]{45}{$\Rightarrow$}}
+\NewDocumentCommand{\Nwarrow}{}{\rotatebox[origin=c]{135}{$\Rightarrow$}}
+\NewDocumentCommand{\Swarrow}{}{\rotatebox[origin=c]{-135}{$\Rightarrow$}}
+\NewDocumentCommand{\Searrow}{}{\rotatebox[origin=c]{-45}{$\Rightarrow$}}
+
+
+% ===== Ligatures =====
+
+% TODO ligatures???
+
+
+% ===== Stuff =====
+\NewDocumentCommand{\cat}{m}{\mathcal{#1}}
+\NewDocumentCommand{\fun}{m}{\mathcal{#1}}
+\NewDocumentCommand{\ncat}{m}{\mathsf{#1}}
+\NewDocumentCommand{\class}{m}{\mathscr{#1}}
+
+\newcommand\secorner{\lrcorner}
+\newcommand\necorner{\rotatebox[origin=c]{90}{$\lrcorner$}}
+\newcommand\nwcorner{\rotatebox[origin=c]{180}{$\lrcorner$}}
+\newcommand\swcorner{\rotatebox[origin=c]{270}{$\lrcorner$}}
+
+
+% ===== Blackboard and Caligraphy Characters =====
+\newcommand\bbA{\mathbb{A}}
+\newcommand\bbB{\mathbb{B}}
+\newcommand\bbC{\mathbb{C}}
+\newcommand\bbD{\mathbb{D}}
+\newcommand\bbE{\mathbb{E}}
+\newcommand\bbF{\mathbb{F}}
+\newcommand\bbG{\mathbb{G}}
+\newcommand\bbH{\mathbb{H}}
+\newcommand\bbI{\mathbbm{I}}
+\newcommand\bbJ{\mathbbm{J}}
+\newcommand\bbK{\mathbb{K}}
+\newcommand\bbL{\mathbb{L}}
+\newcommand\bbM{\mathbb{M}}
+\newcommand\bbN{\mathbb{N}}
+\newcommand\bbO{\mathbb{O}}
+\newcommand\bbP{\mathbb{P}}
+\newcommand\bbQ{\mathbb{Q}}
+\newcommand\bbR{\mathbb{R}}
+\newcommand\bbS{\mathbb{S}}
+\newcommand\bbT{\mathbb{T}}
+\newcommand\bbU{\mathbb{U}}
+\newcommand\bbV{\mathbb{V}}
+\newcommand\bbW{\mathbb{W}}
+\newcommand\bbX{\mathbb{X}}
+\newcommand\bbY{\mathbb{Y}}
+\newcommand\bbZ{\mathbb{Z}}
+\newcommand\bbOne{\mathbbm{1}}
+\newcommand\bbTwo{\mathbbm{2}}
+\newcommand\bbThree{\mathbb{3}}
+
+\newcommand\bbDelta{\mathbb{\Delta}}
+
+
+\newcommand\calA{\mathcal{A}}
+\newcommand\calB{\mathcal{B}}
+\newcommand\calC{\mathcal{C}}
+\newcommand\calD{\mathcal{D}}
+\newcommand\calE{\mathcal{E}}
+\newcommand\calF{\mathcal{F}}
+\newcommand\calG{\mathcal{G}}
+\newcommand\calH{\mathcal{H}}
+\newcommand\calI{\mathcal{I}}
+\newcommand\calJ{\mathcal{J}}
+\newcommand\calK{\mathcal{K}}
+\newcommand\calL{\mathcal{L}}
+\newcommand\calM{\mathcal{M}}
+\newcommand\calN{\mathcal{N}}
+\newcommand\calO{\mathcal{O}}
+\newcommand\calP{\mathcal{P}}
+\newcommand\calQ{\mathcal{Q}}
+\newcommand\calR{\mathcal{R}}
+\newcommand\calS{\mathcal{S}}
+\newcommand\calT{\mathcal{T}}
+\newcommand\calU{\mathcal{U}}
+\newcommand\calV{\mathcal{V}}
+\newcommand\calW{\mathcal{W}}
+\newcommand\calX{\mathcal{X}}
+\newcommand\calY{\mathcal{Y}}
+\newcommand\calZ{\mathcal{Z}}
+
+
+\newcommand\scrA{\mathscr{A}}
+\newcommand\scrB{\mathscr{B}}
+\newcommand\scrC{\mathscr{C}}
+\newcommand\scrD{\mathscr{D}}
+\newcommand\scrE{\mathscr{E}}
+\newcommand\scrF{\mathscr{F}}
+\newcommand\scrG{\mathscr{G}}
+\newcommand\scrH{\mathscr{H}}
+\newcommand\scrI{\mathscr{I}}
+\newcommand\scrJ{\mathscr{J}}
+\newcommand\scrK{\mathscr{K}}
+\newcommand\scrL{\mathscr{L}}
+\newcommand\scrM{\mathscr{M}}
+\newcommand\scrN{\mathscr{N}}
+\newcommand\scrO{\mathscr{O}}
+\newcommand\scrP{\mathscr{P}}
+\newcommand\scrQ{\mathscr{Q}}
+\newcommand\scrR{\mathscr{R}}
+\newcommand\scrS{\mathscr{S}}
+\newcommand\scrT{\mathscr{T}}
+\newcommand\scrU{\mathscr{U}}
+\newcommand\scrV{\mathscr{V}}
+\newcommand\scrW{\mathscr{W}}
+\newcommand\scrX{\mathscr{X}}
+\newcommand\scrY{\mathscr{Y}}
+\newcommand\scrZ{\mathscr{Z}}
+
+
+
+% ===== Relations =====
+
+\renewcommand\epsilon{\varepsilon}
+\newcommand\divides{\mid}
+
+\newcommand\isom{\cong}
+\newcommand\amounts{\mathrel{\widehat{=}}}
+
+% TODO triangleeq 
+
+
+
+% ===== Binary Operators =====
+
+% --- Intersection ---
+\let\Bbcap\Cap
+\let\Cap\relax
+%\newcommand\cap{\cap}
+\newcommand\Cap{\bigcap}
+\newcommand\intersect{\cap}
+\newcommand\Intersect{\bigcap}
+
+% --- Union ---
+\let\Bbcup\Cup
+\let\Cup\relax
+%\newcommand\cup{\cup}
+\newcommand\Cup{\bigcup}
+\newcommand\union{\cup}
+\newcommand\Union{\bigcup}
+
+% --- Sum ---
+%\newcommand\sum{+}
+\newcommand\Sum{\sum}
+
+% --- Product ---
+
+% TODO: make pullback mathop?
+
+%\newcommand\prod{\mathbin{\Pi}}
+\newcommand\Prod{\prod}
+\newcommand\product{\mathbin{\Pi}}
+\newcommand\Product{\prod}
+
+% --- Coproduct ---
+\let\bigcoprod\coprod
+\let\coprod\relax
+\newcommand\coprod{\amalg}
+\newcommand\Coprod{\bigcoprod}
+\newcommand\coproduct{\amalg}
+\newcommand\Coproduct{\bigcoprod}
+
+% --- Tensor ---
+%\newcommand\otimes{\otimes}
+\newcommand\Otimes{\bigotimes}
+\newcommand\tensor{\otimes}
+\newcommand\Tensor{\bigotimes}
+
+% --- Power and Copower ---
+\newcommand\power{\pitchfork}
+\newcommand\copower{\odot}
+
+% --- Direct Sum ---
+%\newcommand\oplus{\oplus}
+\newcommand\Oplus{\bigoplus}
+\newcommand\dirsum{\oplus}
+\newcommand\Dirsum{\bigoplus}
+
+% --- Versions of Vee ---
+\newcommand\ordjoin{\vee}		% order join
+\newcommand\Ordjoin{\bigvee}
+
+\newcommand\topjoin{\vee}		% topological join
+\newcommand\Topjoin{\bigvee}
+
+% --- Versions of Wedge ---
+\newcommand\topsmash{\wedge}
+\newcommand\Topsmash{\bigwedge}
+
+\newcommand\ordmeet{\wedge}
+\newcommand\Ordmeet{\bigwedge}
+
+% --- Asterisk ---
+\newcommand\catjoin{\ast}		% categorical join
+%\newcommand\Catjoin{\bigast} 	% https://tex.stackexchange.com/questions/41186/big-asterisk-bigast-symbol
+
+% TODO boxslash (see https://tex.stackexchange.com/questions/448742/is-there-a-box-with-a-slash/448744)
+
+
+
+
+% ===== Brackets =====
+
+\NewDocumentCommand{\norm}{m}{\vert#1\vert}
+\NewDocumentCommand{\Norm}{m}{\Vert#1\Vert}
+
+\NewDocumentCommand{\gen}{m}{\langle#1\rangle}
+\NewDocumentCommand{\Gen}{m}{\langle\!\langle#1\rangle\!\rangle}
+
+\NewDocumentCommand{\scalar}{m}{\langle#1\rangle}
+
+
+
+
+% ===== Operators =====
+
+% --- Algebra ---
+%\DeclareMathOperator\dim{dim}
+\DeclareMathOperator\rank{rank}
+\DeclareMathOperator\sign{sign}
+\DeclareMathOperator\diag{diag}
+\DeclareMathOperator\characteristic{char}
+\DeclareMathOperator\trace{trace}
+
+\DeclareMathOperator\Quot{Quot}
+\DeclareMathOperator\Frac{Frac}
+
+\DeclareMathOperator\nrad{nrad}
+\DeclareMathOperator\jrad{jrad}
+
+\DeclareMathOperator\GL{GL}
+\DeclareMathOperator\SL{Ob}
+\DeclareMathOperator\PGL{PGL}
+\DeclareMathOperator\PSL{PSL}
+
+\DeclareMathOperator\Ext{Ext}
+\DeclareMathOperator\Tor{Tor}
+
+% --- Algebraic Geometry ---
+\DeclareMathOperator\Spec{Spec}
+\DeclareMathOperator\mSpec{mSpec}
+\DeclareMathOperator\Proj{Proj}
+
+% --- Homotopy Theory ---
+\DeclareMathOperator\Cyl{Cyl}
+\DeclareMathOperator\Cone{Cone}
+\DeclareMathOperator\Susp{Susp}
+\DeclareMathOperator\Tel{Tel}
+
+\DeclareMathOperator\Ho{Ho}
+\DeclareMathOperator\ho{ho}
+
+\DeclareMathOperator\Fib{Fib}
+\DeclareMathOperator\Cof{Cof}
+\DeclareMathOperator\WE{WE}
+
+\DeclareMathOperator*\holim{holim}
+\DeclareMathOperator*\hocolim{hocolim}
+
+% --- Category Theory ---
+\newcommand\op{\text{op}}
+\newcommand\co{\text{co}}
+\newcommand\coop{\text{coop}}
+
+\DeclareMathOperator\Ob{Ob}
+\DeclareMathOperator\Mor{Mor}
+\DeclareMathOperator\Hom{Hom}
+\DeclareMathOperator\Map{Map}
+\DeclareMathOperator\Iso{Iso}
+\DeclareMathOperator\End{End}
+\DeclareMathOperator\Aut{Aut}
+
+\DeclareMathOperator\id{id}
+\DeclareMathOperator\dom{dom}
+\DeclareMathOperator\codom{codom}
+\DeclareMathOperator\incl{incl}
+\DeclareMathOperator\pr{pr}
+\DeclareMathOperator\ev{ev}
+\DeclareMathOperator\const{const}
+
+%\DeclareMathOperator\lim{lim}
+\DeclareMathOperator*\colim{colim}
+\DeclareMathOperator\eq{eq}
+\DeclareMathOperator\coeq{coeq}
+%\DeclareMathOperator\ker{ker}
+\DeclareMathOperator\coker{coker}
+\DeclareMathOperator\img{img}
+\DeclareMathOperator\coimg{coimg}
+
+% TODO injective / projective / filtered (co)limits
+
+\DeclareMathOperator\Fun{Fun}
+\DeclareMathOperator\Arr{Arr}
+\DeclareMathOperator\Add{Add}
+\DeclareMathOperator\Tot{Tot}
+\DeclareMathOperator\Par{Par}
+\DeclareMathOperator\Psh{Psh}
+\DeclareMathOperator\Elt{Elt} % category of elements?
+
+\DeclareMathOperator\Lan{Lan}
+\DeclareMathOperator\Ran{Ran}
+
+% --- Analysis ---
+\let\Im\relax
+\DeclareMathOperator\Im{Im}
+\let\Re\relax
+\DeclareMathOperator\Re{Re}
+
+\DeclareMathOperator\diam{diam}
+\DeclareMathOperator\supp{supp}
+\DeclareMathOperator\closure{cl}
+\DeclareMathOperator\interior{int}
+\DeclareMathOperator\boundary{bd}
+\DeclareMathOperator\convex{conv}
+
